@@ -283,7 +283,7 @@ int main(int argc, char** argv) {
     helperCuda(c, a, b, arraySize, blocks, threads);
     end = clock();
     time_spent = (double)(end - start) / CLOCKS_PER_SEC;
-    printf("All pageable Cuda math operations: %f seconds\n", time_spent);
+    printf("\n\nAll pageable Cuda math operations: %f seconds\n", time_spent);
 
     cudaDeviceReset();
 
