@@ -224,6 +224,24 @@ int main(int argc, char** argv) {
     clock_t start, end;
     double time_spent;
 
+    //allow for changing number of blocks 
+    if (argc == 2) {
+
+        blocks = atoi(argv[1]);
+        printf("Blocks changed to:%i\n", blocks);
+
+    }
+
+    //allow for changing number of threads
+    else if (argc == 3) {
+
+        blocks = atoi(argv[1]);
+        threads = atoi(argv[2]);
+
+        printf("Blocks changed to:%i\n", blocks);
+        printf("Threads changed to:%i\n", threads);
+    }
+
     for (int i = 0; i < 2; i++) {
 
         cudaDeviceReset();
