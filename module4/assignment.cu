@@ -218,35 +218,16 @@ int main(int argc, char** argv) {
     int blocks = 512;
     int threads = 256;
     int a[arraySize], b[arraySize], c[arraySize];
-    char* text[] = { "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+    const char* text[] = { "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
         "THIS IS A SAMPLE STRING FOR THE TESTING OPERATIONS OF THE CIPHER" };
     char result[100] = {'\0'};
     clock_t start, end;
     double time_spent;
 
-
-    //allow for changing number of blocks 
-    if (argc == 2) {
-
-        blocks = atoi(argv[1]);
-        printf("Blocks changed to:%i\n", blocks);
-
-    }
-
-    //allow for changing number of threads
-    else if (argc == 3) {
-
-        blocks = atoi(argv[1]);
-        threads = atoi(argv[2]);
-
-        printf("Blocks changed to:%i\n", blocks);
-        printf("Threads changed to:%i\n", threads);
-    }
-
     for (int i = 0; i < 2; i++) {
 
         cudaDeviceReset();
-        int s = strlen(text[i]);
+        size_t s = strlen(text[i]);
 
         start = clock();
         printf("\nInput:\n%s\n", text[i]);
@@ -297,7 +278,7 @@ int main(int argc, char** argv) {
     helperCudaPinned(c, a, b, arraySize, blocks, threads);
     end = clock();
     time_spent = (double)(end - start) / CLOCKS_PER_SEC;
-    printf("all pinned cuda math operations: %f seconds\n", time_spent);
+    printf("All pinned Cuda math operations: %f seconds\n", time_spent);
 
     return 0;
 }
