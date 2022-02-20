@@ -245,6 +245,7 @@ int main(int argc, char** argv) {
 
     for (int i = 0; i < 2; i++) {
 
+        cudaDeviceReset();
         int s = strlen(text[i]);
 
         start = clock();
@@ -257,6 +258,8 @@ int main(int argc, char** argv) {
         end = clock();
         time_spent = (double)(end - start) / CLOCKS_PER_SEC;
         printf("Caesar Cipher Pinned Memory: %f seconds\n", time_spent);
+
+        cudaDeviceReset();
 
         start = clock();
         printf("\nInput:\n%s\n", text[i]);
@@ -272,29 +275,29 @@ int main(int argc, char** argv) {
     }
 
     //populate arrays and run branching code
-    //for (int i = 0; i < arraySize; i++) {
-    //    a[i] = i;
-    //    b[i] = rand() % 4;
-    //}
-    //start = clock();
-    //helperCuda(c, a, b, arraySize, blocks, threads);
-    //end = clock();
-    //time_spent = (double)(end - start) / CLOCKS_PER_SEC;
-    //printf("All pageable Cuda math operations: %f seconds\n", time_spent);
+    for (int i = 0; i < arraySize; i++) {
+        a[i] = i;
+        b[i] = rand() % 4;
+    }
+    start = clock();
+    helperCuda(c, a, b, arraySize, blocks, threads);
+    end = clock();
+    time_spent = (double)(end - start) / CLOCKS_PER_SEC;
+    printf("All pageable Cuda math operations: %f seconds\n", time_spent);
 
-    //cudaDeviceReset();
+    cudaDeviceReset();
 
-    ////populate arrays and run branching code
-    //for (int i = 0; i < arraySize; i++) {
-    //    a[i] = i;
-    //    b[i] = rand() % 4;
-    //}
+    //populate arrays and run branching code
+    for (int i = 0; i < arraySize; i++) {
+        a[i] = i;
+        b[i] = rand() % 4;
+    }
 
-    //start = clock();
-    //helperCudaPinned(c, a, b, arraySize, blocks, threads);
-    //end = clock();
-    //time_spent = (double)(end - start) / CLOCKS_PER_SEC;
-    //printf("all pinned cuda math operations: %f seconds\n", time_spent);
+    start = clock();
+    helperCudaPinned(c, a, b, arraySize, blocks, threads);
+    end = clock();
+    time_spent = (double)(end - start) / CLOCKS_PER_SEC;
+    printf("all pinned cuda math operations: %f seconds\n", time_spent);
 
     return 0;
 }
