@@ -148,15 +148,24 @@ void asyncCudaRegister(const int* a, const int* b, unsigned int size, int blocks
     // launch kernels
     cudaStreamWaitEvent(stream1, mem1, 0);
     registerAddKernel << < blocks, threads, 0, stream1 >> > (dev_c1, dev_a, dev_b);
+    cudaEventRecord(mem1, stream1);
 
     cudaStreamWaitEvent(stream2, mem2, 0);
     registerSubKernel << < blocks, threads, 0, stream2 >> > (dev_c2, dev_a, dev_b);
-
+    cudaEventRecord(mem2, stream2);
+    
     cudaStreamWaitEvent(stream3, mem3, 0);
     registerMultKernel << < blocks, threads, 0, stream3 >> > (dev_c3, dev_a, dev_b);
-
+    cudaEventRecord(mem3, stream3);
+    
+    registerMultKernel << < blocks, threads, 0, stream4 >> > (dev_c4, dev_a, dev_b);
     cudaStreamWaitEvent(stream4, mem4, 0);
-    registerModKernel << < blocks, threads, 0, stream4 >> > (dev_c4, dev_a, dev_b);
+    cudaEventRecord(mem4, stream4);
+
+    cudaStreamWaitEvent(stream1, mem1, 0);
+    cudaStreamWaitEvent(stream2, mem2, 0);
+    cudaStreamWaitEvent(stream3, mem3, 0);
+    cudaStreamWaitEvent(stream4, mem4, 0);
 
     //copy back
     cudaMemcpyAsync(c1, dev_c1, size * sizeof(int), cudaMemcpyDeviceToHost, stream1);
@@ -164,7 +173,10 @@ void asyncCudaRegister(const int* a, const int* b, unsigned int size, int blocks
     cudaMemcpyAsync(c3, dev_c3, size * sizeof(int), cudaMemcpyDeviceToHost, stream3);
     cudaMemcpyAsync(c4, dev_c4, size * sizeof(int), cudaMemcpyDeviceToHost, stream4);
 
-    cudaDeviceSynchronize();
+    cudaStreamSynchronize(stream1);
+    cudaStreamSynchronize(stream2);
+    cudaStreamSynchronize(stream3);
+    cudaStreamSynchronize(stream4);
 
     for (int i = 0; i < 10; i++) {
         printf("%d\t%d\t%d\t%d\t%d\t%d\n", a[i], b[i], c1[i], c2[i], c3[i], c4[i]);
@@ -205,8 +217,8 @@ __host__ void generateData(int* a, int* b, int arraySize) {
 
 //main and driver code
 int main(int argc, char** argv) {
-    unsigned int arraySize = 100000;
-    int blocks = 2000;
+    unsigned int arraySize = 10000;
+    int blocks = 400;
     int threads = 256;
     int* h_a, * h_b;
     //allow for changing number of threads
