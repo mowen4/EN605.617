@@ -150,6 +150,7 @@ void asyncCudaRegister(const int* a, const int* b, unsigned int size, int blocks
 
     cudaDeviceSynchronize();
 
+    // print first and last 10 to validate
     for (int i = 0; i < 10; i++) {
         printf("%d\t%d\t%d\t%d\t%d\t%d\n", a[i], b[i], c1[i], c2[i], c3[i], c4[i]);
     }
@@ -169,6 +170,10 @@ void asyncCudaRegister(const int* a, const int* b, unsigned int size, int blocks
     free(c4);
     cudaFree(dev_a);
     cudaFree(dev_b);
+    cudaFree(dev_c1);
+    cudaFree(dev_c2);
+    cudaFree(dev_c3);
+    cudaFree(dev_c4);
 
     //close streams
     cudaStreamDestroy(stream1);
