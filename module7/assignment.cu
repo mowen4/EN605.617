@@ -89,12 +89,6 @@ void asyncCudaRegister(const int* a, const int* b, unsigned int size, int blocks
 
     //initialize cuda stream objects
     cudaStream_t stream1, stream2, stream3, stream4;
-    cudaEvent_t mem1, mem2, mem3, mem4;
-    
-    cudaEventCreate(&mem1);
-    cudaEventCreate(&mem2);
-    cudaEventCreate(&mem3);
-    cudaEventCreate(&mem4);
 
     //initialize timing metrics
     clock_t start, end;
@@ -102,9 +96,10 @@ void asyncCudaRegister(const int* a, const int* b, unsigned int size, int blocks
     start = clock();
 
     //memory pointers
-    int* dev_a1, * dev_b1, * dev_a2, * dev_b2, * dev_a3, * dev_b3, * dev_a4, * dev_b4;
+    int* dev_a = nullptr;
+    int* dev_b = nullptr;
     int* dev_c1, * dev_c2, * dev_c3, * dev_c4;
-    int* c1, *c2, *c3, *c4;
+    int* c1, * c2, * c3, * c4;
 
     //allocate host memory to write back to
     c1 = (int*)malloc(size * sizeof(int));
@@ -117,14 +112,8 @@ void asyncCudaRegister(const int* a, const int* b, unsigned int size, int blocks
     cudaMalloc((void**)&dev_c2, size * sizeof(int));
     cudaMalloc((void**)&dev_c3, size * sizeof(int));
     cudaMalloc((void**)&dev_c4, size * sizeof(int));
-    cudaMalloc((void**)&dev_a1, size * sizeof(int));
-    cudaMalloc((void**)&dev_b1, size * sizeof(int));
-    cudaMalloc((void**)&dev_a2, size * sizeof(int));
-    cudaMalloc((void**)&dev_b2, size * sizeof(int));
-    cudaMalloc((void**)&dev_a3, size * sizeof(int));
-    cudaMalloc((void**)&dev_b3, size * sizeof(int));
-    cudaMalloc((void**)&dev_a4, size * sizeof(int));
-    cudaMalloc((void**)&dev_b4, size * sizeof(int));
+    cudaMalloc((void**)&dev_a, size * sizeof(int));
+    cudaMalloc((void**)&dev_b, size * sizeof(int));
 
     //create cuda streams, one for each meth kernel
     cudaStreamCreate(&stream1);
@@ -132,60 +121,30 @@ void asyncCudaRegister(const int* a, const int* b, unsigned int size, int blocks
     cudaStreamCreate(&stream3);
     cudaStreamCreate(&stream4);
 
+    // Copy input vectors from host memory to GPU buffers and initialize kernel
     // async operations no blocking until after all 
-    // copy all data into each stream and recrod events
-    cudaMemcpyAsync(dev_a1, a, size * sizeof(int), cudaMemcpyHostToDevice, stream1);
-    cudaMemcpyAsync(dev_b1, b, size * sizeof(int), cudaMemcpyHostToDevice, stream1);
-    cudaEventRecord(mem1, stream1);
-    
-    cudaMemcpyAsync(dev_a2, a, size * sizeof(int), cudaMemcpyHostToDevice, stream2);
-    cudaMemcpyAsync(dev_b2, b, size * sizeof(int), cudaMemcpyHostToDevice, stream2);
-    cudaEventRecord(mem2, stream2);
+    cudaMemcpyAsync(dev_a, a, size * sizeof(int), cudaMemcpyHostToDevice, stream1);
+    cudaMemcpyAsync(dev_b, b, size * sizeof(int), cudaMemcpyHostToDevice, stream1);
+    registerAddKernel << < blocks, threads, 0, stream1 >> > (dev_c1, dev_a, dev_b);
+    cudaMemcpyAsync(c1, dev_c1, size * sizeof(int), cudaMemcpyDeviceToHost, stream1);
 
-    cudaMemcpyAsync(dev_a3, a, size * sizeof(int), cudaMemcpyHostToDevice, stream3);
-    cudaMemcpyAsync(dev_b3, b, size * sizeof(int), cudaMemcpyHostToDevice, stream3);
-    cudaEventRecord(mem3, stream3);
+    cudaMemcpyAsync(dev_a, a, size * sizeof(int), cudaMemcpyHostToDevice, stream2);
+    cudaMemcpyAsync(dev_b, b, size * sizeof(int), cudaMemcpyHostToDevice, stream2);
+    registerSubKernel << < blocks, threads, 0, stream2 >> > (dev_c2, dev_a, dev_b);
+    cudaMemcpyAsync(c2, dev_c2, size * sizeof(int), cudaMemcpyDeviceToHost, stream2);
 
-    cudaMemcpyAsync(dev_a4, a, size * sizeof(int), cudaMemcpyHostToDevice, stream4);
-    cudaMemcpyAsync(dev_b4, b, size * sizeof(int), cudaMemcpyHostToDevice, stream4);
-    cudaEventRecord(mem4, stream4);
+    cudaMemcpyAsync(dev_a, a, size * sizeof(int), cudaMemcpyHostToDevice, stream3);
+    cudaMemcpyAsync(dev_b, b, size * sizeof(int), cudaMemcpyHostToDevice, stream3);
+    registerMultKernel << < blocks, threads, 0, stream3 >> > (dev_c3, dev_a, dev_b);
+    cudaMemcpyAsync(c3, dev_c3, size * sizeof(int), cudaMemcpyDeviceToHost, stream3);
 
-    // launch kernels
-    cudaDeviceSynchronize();
-
-    cudaStreamWaitEvent(stream1, mem1, 0);
-    registerAddKernel << < blocks, threads, 0, stream1 >> > (dev_c1, dev_a1, dev_b1);
-    cudaEventRecord(mem1, stream1);
-
-    cudaStreamWaitEvent(stream2, mem2, 0);
-    registerSubKernel << < blocks, threads, 0, stream2 >> > (dev_c2, dev_a2, dev_b2);
-    cudaEventRecord(mem2, stream2);
-    
-    cudaStreamWaitEvent(stream3, mem3, 0);
-    registerMultKernel << < blocks, threads, 0, stream3 >> > (dev_c3, dev_a3, dev_b3);
-    cudaEventRecord(mem3, stream3);
-    
-    cudaStreamWaitEvent(stream4, mem4, 0);
-    registerModKernel << < blocks, threads, 0, stream4 >> > (dev_c4, dev_a4, dev_b4);
-    cudaEventRecord(mem4, stream4);
-
-    cudaStreamSynchronize(stream1);
-    cudaStreamSynchronize(stream2);
-    cudaStreamSynchronize(stream3);
-    cudaStreamSynchronize(stream4);
+    cudaMemcpyAsync(dev_a, a, size * sizeof(int), cudaMemcpyHostToDevice, stream4);
+    cudaMemcpyAsync(dev_b, b, size * sizeof(int), cudaMemcpyHostToDevice, stream4);
+    registerModKernel << < blocks, threads, 0, stream4 >> > (dev_c4, dev_a, dev_b);
+    cudaMemcpyAsync(c4, dev_c4, size * sizeof(int), cudaMemcpyDeviceToHost, stream4);
+    // Launch Kernels
 
     cudaDeviceSynchronize();
-
-    //cudaStreamWaitEvent(stream1, mem1, 0);
-    //cudaStreamWaitEvent(stream2, mem2, 0);
-    //cudaStreamWaitEvent(stream3, mem3, 0);
-    //cudaStreamWaitEvent(stream4, mem4, 0);
-
-    //copy back
-    cudaMemcpy(c1, dev_c1, size * sizeof(int), cudaMemcpyDeviceToHost);
-    cudaMemcpy(c2, dev_c2, size * sizeof(int), cudaMemcpyDeviceToHost);
-    cudaMemcpy(c3, dev_c3, size * sizeof(int), cudaMemcpyDeviceToHost);
-    cudaMemcpy(c4, dev_c4, size * sizeof(int), cudaMemcpyDeviceToHost);
 
     for (int i = 0; i < 10; i++) {
         printf("%d\t%d\t%d\t%d\t%d\t%d\n", a[i], b[i], c1[i], c2[i], c3[i], c4[i]);
@@ -204,19 +163,8 @@ void asyncCudaRegister(const int* a, const int* b, unsigned int size, int blocks
     free(c2);
     free(c3);
     free(c4);
-    cudaFree(dev_a1);
-    cudaFree(dev_b1);
-    cudaFree(dev_a2);
-    cudaFree(dev_b2);
-    cudaFree(dev_a3);
-    cudaFree(dev_b3);
-    cudaFree(dev_a4);
-    cudaFree(dev_b4);
-    cudaFree(dev_c1);
-    cudaFree(dev_c2);
-    cudaFree(dev_c3);
-    cudaFree(dev_c4);
-
+    cudaFree(dev_a);
+    cudaFree(dev_b);
 
     //close streams
     cudaStreamDestroy(stream1);
@@ -237,8 +185,8 @@ __host__ void generateData(int* a, int* b, int arraySize) {
 
 //main and driver code
 int main(int argc, char** argv) {
-    unsigned int arraySize = 10000;
-    int blocks = 400;
+    unsigned int arraySize = 100000;
+    int blocks = 2000;
     int threads = 256;
     int* h_a, * h_b;
     //allow for changing number of threads
