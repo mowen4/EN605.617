@@ -126,21 +126,25 @@ void asyncCudaRegister(const int* a, const int* b, unsigned int size, int blocks
     cudaMemcpyAsync(dev_a, a, size * sizeof(int), cudaMemcpyHostToDevice, stream1);
     cudaMemcpyAsync(dev_b, b, size * sizeof(int), cudaMemcpyHostToDevice, stream1);
     registerAddKernel << < blocks, threads, 0, stream1 >> > (dev_c1, dev_a, dev_b);
+    cudaStreamSynchronize(stream1);
     cudaMemcpyAsync(c1, dev_c1, size * sizeof(int), cudaMemcpyDeviceToHost, stream1);
 
     cudaMemcpyAsync(dev_a, a, size * sizeof(int), cudaMemcpyHostToDevice, stream2);
     cudaMemcpyAsync(dev_b, b, size * sizeof(int), cudaMemcpyHostToDevice, stream2);
     registerSubKernel << < blocks, threads, 0, stream2 >> > (dev_c2, dev_a, dev_b);
+    cudaStreamSynchronize(stream2);
     cudaMemcpyAsync(c2, dev_c2, size * sizeof(int), cudaMemcpyDeviceToHost, stream2);
 
     cudaMemcpyAsync(dev_a, a, size * sizeof(int), cudaMemcpyHostToDevice, stream3);
     cudaMemcpyAsync(dev_b, b, size * sizeof(int), cudaMemcpyHostToDevice, stream3);
     registerMultKernel << < blocks, threads, 0, stream3 >> > (dev_c3, dev_a, dev_b);
+    cudaStreamSynchronize(stream3);
     cudaMemcpyAsync(c3, dev_c3, size * sizeof(int), cudaMemcpyDeviceToHost, stream3);
 
     cudaMemcpyAsync(dev_a, a, size * sizeof(int), cudaMemcpyHostToDevice, stream4);
     cudaMemcpyAsync(dev_b, b, size * sizeof(int), cudaMemcpyHostToDevice, stream4);
     registerModKernel << < blocks, threads, 0, stream4 >> > (dev_c4, dev_a, dev_b);
+    cudaStreamSynchronize(stream4);
     cudaMemcpyAsync(c4, dev_c4, size * sizeof(int), cudaMemcpyDeviceToHost, stream4);
     // Launch Kernels
 
@@ -186,7 +190,7 @@ __host__ void generateData(int* a, int* b, int arraySize) {
 //main and driver code
 int main(int argc, char** argv) {
     unsigned int arraySize = 100000;
-    int blocks = 2000;
+    int blocks = 400;
     int threads = 256;
     int* h_a, * h_b;
     //allow for changing number of threads
