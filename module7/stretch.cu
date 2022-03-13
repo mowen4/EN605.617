@@ -133,7 +133,7 @@ void print_all_CUDA_devices_and_properties() {
 	}
 }
 
-__host__ float execute_register_memory_operations(void)
+__host__ float execute_register_memory_operations()
 {
 	const unsigned int num_elements = NUM_THREADS;
 	const unsigned int num_bytes = NUM_THREADS * sizeof(unsigned int);
@@ -185,8 +185,8 @@ __host__ float execute_register_memory_operations(void)
 	}
 
 	//free device and host memory allocations
-	free(hi_data);
-	free(hf_data);
+	cudaFreeHost(hi_data);
+	cudaFreeHost(hf_data);
 	cudaFree(d_data);
 	cudaDeviceReset();
 
@@ -264,7 +264,7 @@ int main(void) {
 
   //test harness for timing some kernels using streams and events
 	float delta_shared = execute_shared_memory_operations();
-	float delta_register = execute_register_memory_operations(void);
+	float delta_register = execute_register_memory_operations();
 
 	//print out the results of the time executions returned by the prev methods
 	printf("========================\n");
