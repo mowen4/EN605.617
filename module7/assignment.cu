@@ -153,19 +153,19 @@ void asyncCudaRegister(const int* a, const int* b, unsigned int size, int blocks
     // launch kernels
     cudaDeviceSynchronize();
 
-    cudaStreamWaitEvent(stream1, mem1);
+    cudaStreamWaitEvent(stream1, mem1, 0);
     registerAddKernel << < blocks, threads, 0, stream1 >> > (dev_c1, dev_a1, dev_b1);
     cudaEventRecord(mem1, stream1);
 
-    cudaStreamWaitEvent(stream2, mem2);
+    cudaStreamWaitEvent(stream2, mem2, 0);
     registerSubKernel << < blocks, threads, 0, stream2 >> > (dev_c2, dev_a2, dev_b2);
     cudaEventRecord(mem2, stream2);
     
-    cudaStreamWaitEvent(stream3, mem3);
+    cudaStreamWaitEvent(stream3, mem3, 0);
     registerMultKernel << < blocks, threads, 0, stream3 >> > (dev_c3, dev_a3, dev_b3);
     cudaEventRecord(mem3, stream3);
     
-    cudaStreamWaitEvent(stream4, mem4);
+    cudaStreamWaitEvent(stream4, mem4, 0);
     registerModKernel << < blocks, threads, 0, stream4 >> > (dev_c4, dev_a4, dev_b4);
     cudaEventRecord(mem4, stream4);
 
