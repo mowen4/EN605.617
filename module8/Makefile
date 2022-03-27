@@ -266,32 +266,32 @@ GENCODE_FLAGS += -gencode arch=compute_$(HIGHEST_SM),code=compute_$(HIGHEST_SM)
 endif
 endif
 
-ALL_CCFLAGS += --threads 0 --std=c++11
-
-LIBRARIES += -lcublas
-
-################################################################################
-
-# Target rules
-all: build
-
-build: assignment8
-
-simpleCUBLAS.o:assignment8.cpp
-	$(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
-
-simpleCUBLAS: assignment8.o
-	$(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
-	mkdir -p ../../../bin/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
-	cp $@ ../../../bin/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
-
-run: build
-	./assignment8
-
-testrun: build
-
-clean:
-	rm -f assignment8 assignment8.o
-	rm -rf ../../../bin/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)/simpleCUBLAS
-
+ALL_CCFLAGS += --std=c++11                                                                                                                                                                                             
+                                                                                                                                                                                                                       
+LIBRARIES += -lcublas                                                                                                                                                                                                  
+                                                                                                                                                                                                                       
+################################################################################                                                                                                                                       
+                                                                                                                                                                                                                       
+# Target rules                                                                                                                                                                                                         
+all: build                                                                                                                                                                                                             
+                                                                                                                                                                                                                       
+build: assignment8                                                                                                                                                                                                     
+                                                                                                                                                                                                                       
+assignment8.o:assignment8.cpp                                                                                                                                                                                          
+        $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<                                                                                                                                                
+                                                                                                                                                                                                                       
+assignment8: assignment8.o                                                                                                                                                                                             
+        $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)                                                                                                                                                  
+        mkdir -p ./$(BUILD_TYPE)                                                                                                                                                                                       
+        cp $@ ./$(BUILD_TYPE)                                                                                                                                                                                          
+                                                                                                                                                                                                                       
+run: build                                                                                                                                                                                                             
+        ./assignment8                                                                                                                                                                                                  
+                                                                                                                                                                                                                       
+testrun: build                                                                                                                                                                                                         
+                                                                                                                                                                                                                       
+clean:                                                                                                                                                                                                                 
+        rm -f assignment8 assignment8.o                                                                                                                                                                                
+        rm -rf ./$(BUILD_TYPE)/assigment8                                                                                                                                                                              
+                                                                                                                                                                                                                       
 clobber: clean
