@@ -102,7 +102,7 @@ int main(int argc, char** argv) {
     auto duration = duration_cast<microseconds>(stop - start);
 
     cout << "Time taken by function: "
-        << (float) duration.count() / 1000000 << "seconds" << endl;
+        << (float) duration.count() / 1000000 << " seconds" << endl;
 
 
 
