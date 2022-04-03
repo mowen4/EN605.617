@@ -109,7 +109,7 @@ int main(int argc, char *argv[]) {
     if (checkCmdLineFlag(argc, (const char **)argv, "input")) {
       getCmdLineArgumentString(argc, (const char **)argv, "input", &filePath);
     } else {
-      filePath = sdkFindFilePath("teapot512.pgm", argv[0]);
+      filePath = sdkFindFilePath("lena.pgm", argv[0]);
     }
 
     if (filePath) {
