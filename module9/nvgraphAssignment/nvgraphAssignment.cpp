@@ -5,6 +5,8 @@
 #include "nvgraph.h"
 #include <chrono>
 
+using namespace std::chrono;
+
 void check(nvgraphStatus_t status) {
     if (status != NVGRAPH_STATUS_SUCCESS) {
         printf("ERROR : %d\n", status);
