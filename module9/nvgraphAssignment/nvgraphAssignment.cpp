@@ -46,7 +46,7 @@ int main(int argc, char** argv) {
     CSC_input = (nvgraphCSCTopology32I_t)malloc(sizeof(struct nvgraphCSCTopology32I_st));
     vertex_dim[0] = (void*)ssspBase; vertex_dimT[0] = CUDA_R_32F;
     float weights_h[] = { 0.2, 0.3, 0.4, 0.5, 0.5, 1.25, 0.77, 0.1, 0.1, 0.1 };
-    int destination_offsets_h[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    int destination_offsets_h[] = {0, 1, 3, 4, 6, 8, 10};
     int source_indices_h[] = { 2, 0, 2, 0, 4, 5, 2, 3, 3, 4 };
     check(nvgraphCreate(&handle));
     check(nvgraphCreateGraphDescr(handle, &graph));
