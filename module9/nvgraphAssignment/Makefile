@@ -218,7 +218,6 @@ ALL_LDFLAGS += $(addprefix -Xlinker ,$(EXTRA_LDFLAGS))
 # Common includes and paths for CUDA
 INCLUDES  := -I../../common/inc
 LIBRARIES :=
-ALL_CCFLAGS += --std=c++11
 
 ################################################################################
 
@@ -242,6 +241,8 @@ endif
 endif
 
 LIBRARIES += -lnvgraph
+
+ALL_CCFLAGS += --std=c++11
 
 ifeq ($(SAMPLE_ENABLED),0)
 EXEC ?= @echo "[@]"
