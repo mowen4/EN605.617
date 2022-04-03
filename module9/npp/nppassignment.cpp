@@ -18,6 +18,8 @@
 #include <iostream>
 #include <string>
 
+using namespace std;
+
 #if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)
 #define STRCASECMP _stricmp
 #define STRNCASECMP _strnicmp
@@ -26,36 +28,10 @@
 #define STRNCASECMP strncasecmp
 #endif
 
-int main(int argc, char* argv[]) {
+npp::ImageCPU_8u_C1 runNPP(npp::ImageNPP_8u_C1 oDeviceSrc) {
 
     const int binCount = 255;
     const int levelCount = binCount + 1;
-    std::string sFilename;
-    char* filePath;
-
-    //get file input dir and location
-    if (checkCmdLineFlag(argc, (const char**)argv, "input")) {
-        getCmdLineArgumentString(argc, (const char**)argv, "input", &filePath);
-        sFilename = filePath;
-    }
-    else {
-        exit(EXIT_FAILURE);
-    }
-
-    // Read in file and set output file
-    std::ifstream infile(sFilename.data(), std::ifstream::in);
-    std::cout << "histEqualizationNPP opened: <" << sFilename.data() << std::endl;
-    std::string outFileName = sFilename;
-    std::string::size_type dot = outFileName.rfind('.');
-
-    if (dot != std::string::npos) {
-        outFileName = outFileName.substr(0, dot);
-    }
-    outFileName += "_histEQ.pgm";
-
-    npp::ImageCPU_8u_C1 oHostSrc;
-    npp::loadImage(sFilename, oHostSrc);
-    npp::ImageNPP_8u_C1 oDeviceSrc(oHostSrc);
 
     // allocate arrays for histogram and levels
 
@@ -66,11 +42,11 @@ int main(int argc, char* argv[]) {
     cudaMalloc((void**)&levelsDevice, levelCount * sizeof(Npp32s));
 
     // compute histogram
-    NppiSize oSizeROI = { (int)oDeviceSrc.width(), (int)oDeviceSrc.height() };
+    NppiSize SizeRangeOfInterest = { (int)oDeviceSrc.width(), (int)oDeviceSrc.height() };
 
     // create device scratch buffer for nppiHistogram
     int nDeviceBufferSize;
-    nppiHistogramEvenGetBufferSize_8u_C1R(oSizeROI, levelCount, &nDeviceBufferSize);
+    nppiHistogramEvenGetBufferSize_8u_C1R(SizeRangeOfInterest, levelCount, &nDeviceBufferSize);
     Npp8u* pDeviceBuffer;
     cudaMalloc((void**)&pDeviceBuffer, nDeviceBufferSize);
 
@@ -78,14 +54,14 @@ int main(int argc, char* argv[]) {
     Npp32s levelsHost[levelCount];
     nppiEvenLevelsHost_32s(levelsHost, levelCount, 0, binCount);
     // compute the histogram
-    nppiHistogramEven_8u_C1R(oDeviceSrc.data(), oDeviceSrc.pitch(), oSizeROI, histDevice, levelCount, 0, binCount, pDeviceBuffer);
+    nppiHistogramEven_8u_C1R(oDeviceSrc.data(), oDeviceSrc.pitch(), SizeRangeOfInterest, histDevice, levelCount, 0, binCount, pDeviceBuffer);
     // copy histogram and levels to host memory
     Npp32s h_hist[binCount];
-    cudaMemcpy(h_hist, histDevice, binCount * sizeof(Npp32s),cudaMemcpyDeviceToHost);
+    cudaMemcpy(h_hist, histDevice, binCount * sizeof(Npp32s), cudaMemcpyDeviceToHost);
 
     Npp32s h_lookUpTable[levelCount];
 
-    // fill LUT
+    // generate lookup table
     {
         Npp32s* pHostHistogram = h_hist;
         Npp32s totalSum = 0;
@@ -94,13 +70,13 @@ int main(int argc, char* argv[]) {
             totalSum += *pHostHistogram;
         }
 
-        NPP_ASSERT(totalSum <= oSizeROI.width * oSizeROI.height);
+        totalSum <= SizeRangeOfInterest.width * SizeRangeOfInterest.height;
 
         if (totalSum == 0) {
             totalSum = 1;
         }
 
-        float multiplier = 1.0f / float(oSizeROI.width * oSizeROI.height) * 0xFF;
+        float multiplier = 1.0f / float(SizeRangeOfInterest.width * SizeRangeOfInterest.height) * 0xFF;
 
         Npp32s runningSum = 0;
         Npp32s* pLookupTable = h_lookUpTable;
@@ -116,13 +92,9 @@ int main(int argc, char* argv[]) {
     }
 
     //
-    // apply LUT transformation to the image
-    //
-    // Create a device image for the result.
+    // apply LUT transformation and create the image in memory
     npp::ImageNPP_8u_C1 oDeviceDst(oDeviceSrc.size());
 
-    // Note for CUDA 5.0, that nppiLUT_Linear_8u_C1R requires these pointers to
-    // be in GPU device memory
     Npp32s* lutDevice = 0;
     Npp32s* lvlsDevice = 0;
 
@@ -131,9 +103,9 @@ int main(int argc, char* argv[]) {
 
     cudaMemcpy(lutDevice, h_lookUpTable, sizeof(Npp32s) * (levelCount), cudaMemcpyHostToDevice);
     cudaMemcpy(lvlsDevice, levelsHost, sizeof(Npp32s) * (levelCount), cudaMemcpyHostToDevice);
-    
+
     nppiLUT_Linear_8u_C1R(oDeviceSrc.data(), oDeviceSrc.pitch(), oDeviceDst.data(), oDeviceDst.pitch(),
-        oSizeROI,lutDevice, lvlsDevice, levelCount);
+        SizeRangeOfInterest, lutDevice, lvlsDevice, levelCount);
 
     cudaFree(lutDevice);
     cudaFree(lvlsDevice);
@@ -149,8 +121,46 @@ int main(int argc, char* argv[]) {
     nppiFree(oDeviceSrc.data());
     nppiFree(oDeviceDst.data());
 
+
+    return oHostDst;
+}
+
+
+int main(int argc, char* argv[]) {
+
+    std::string sFilename;
+    char* filePath;
+
+    //get file input dir and location
+    if (checkCmdLineFlag(argc, (const char**)argv, "input")) {
+        getCmdLineArgumentString(argc, (const char**)argv, "input", &filePath);
+        sFilename = filePath;
+    }
+    else {
+        exit(EXIT_FAILURE);
+    }
+
+    // Read in file and set output file
+    std::ifstream infile(sFilename.data(), std::ifstream::in);
+    std::cout << "file open successfully: <" << sFilename.data() << std::endl;
+    std::string outFileName = sFilename;
+    std::string::size_type dot = outFileName.rfind('.');
+
+    if (dot != std::string::npos) {
+        outFileName = outFileName.substr(0, dot);
+    }
+    outFileName += "_histEQ.pgm";
+
+    npp::ImageCPU_8u_C1 oHostSrc;
+    npp::loadImage(sFilename, oHostSrc);
+    npp::ImageNPP_8u_C1 oDeviceSrc(oHostSrc);
+
+    npp::ImageCPU_8u_C1 outImage;
+
+    outImage = runNPP(oDeviceSrc);
+
     // SAve the image out
-    npp::saveImage(outFileName.c_str(), oHostDst);
+    npp::saveImage(outFileName.c_str(), outImage);
     std::cout << "Saved image file " << outFileName << std::endl;
     exit(EXIT_SUCCESS);
 
