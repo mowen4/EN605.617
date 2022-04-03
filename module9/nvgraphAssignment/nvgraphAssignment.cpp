@@ -63,7 +63,7 @@ int main(int argc, char** argv) {
     check(nvgraphSssp(handle, graph, 0, &sourceVertices, 0));
     // Get and print result
     check(nvgraphGetVertexData(handle, graph, (void*)ssspBase, 0));
-    printf("sssp_1_h \n"); for (int i = 0; i < 10; i++)  printf("%f\n", ssspBase[i]); printf("\n");
+    printf("Shortest distance from input node to other nodes \n"); for (int i = 0; i < 10; i++)  printf("%f\n", ssspBase[i]); printf("\n");
     
     auto stop = high_resolution_clock::now();
 
