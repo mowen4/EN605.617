@@ -22,7 +22,7 @@
 #include <thrust/zip_function.h>
 #endif // >= C++11
 
-struct arbitrary_functor1
+struct add
 {
     template <typename Tuple>
     __host__ __device__
@@ -30,6 +30,39 @@ struct arbitrary_functor1
     {
         // D[i] = A[i] + B[i] * C[i];
         thrust::get<2>(t) = thrust::get<0>(t) + thrust::get<1>(t);
+    }
+};
+
+struct sub
+{
+    template <typename Tuple>
+    __host__ __device__
+        void operator()(Tuple t)
+    {
+        // D[i] = A[i] + B[i] * C[i];
+        thrust::get<2>(t) = thrust::get<0>(t) - thrust::get<1>(t);
+    }
+};
+
+struct mod
+{
+    template <typename Tuple>
+    __host__ __device__
+        void operator()(Tuple t)
+    {
+        // D[i] = A[i] + B[i] * C[i];
+        thrust::get<2>(t) = thrust::get<0>(t) % thrust::get<1>(t);
+    }
+};
+
+struct mul
+{
+    template <typename Tuple>
+    __host__ __device__
+        void operator()(Tuple t)
+    {
+        // D[i] = A[i] + B[i] * C[i];
+        thrust::get<2>(t) = thrust::get<0>(t) * thrust::get<1>(t);
     }
 };
 
@@ -84,19 +117,19 @@ int thruster(int n)
     //Add
     thrust::for_each(thrust::make_zip_iterator(thrust::make_tuple(A.begin(), B.begin(), C.begin())),
         thrust::make_zip_iterator(thrust::make_tuple(A.end(), B.end(), C.end())),
-        arbitrary_functor1());
-    ////Sub
-    //thrust::for_each(thrust::make_zip_iterator(thrust::make_tuple(A.begin(), B.begin(), C.begin())),
-    //    thrust::make_zip_iterator(thrust::make_tuple(A.end(), B.end(), C.end())),
-    //    thrust::make_zip_function(sub()));
-    ////Mul
-    //thrust::for_each(thrust::make_zip_iterator(thrust::make_tuple(A.begin(), B.begin(), C.begin())),
-    //    thrust::make_zip_iterator(thrust::make_tuple(A.end(), B.end(), C.end())),
-    //    thrust::make_zip_function(mul()));
-    ////Mod
-    //thrust::for_each(thrust::make_zip_iterator(thrust::make_tuple(A.begin(), B.begin(), C.begin())),
-    //    thrust::make_zip_iterator(thrust::make_tuple(A.end(), B.end(), C.end())),
-    //    thrust::make_zip_function(mod()));
+        add());
+    //Sub
+    thrust::for_each(thrust::make_zip_iterator(thrust::make_tuple(A.begin(), B.begin(), C.begin())),
+        thrust::make_zip_iterator(thrust::make_tuple(A.end(), B.end(), C.end())),
+        sub());
+    //Mul
+    thrust::for_each(thrust::make_zip_iterator(thrust::make_tuple(A.begin(), B.begin(), C.begin())),
+        thrust::make_zip_iterator(thrust::make_tuple(A.end(), B.end(), C.end())),
+        mul());
+    //Mod
+    thrust::for_each(thrust::make_zip_iterator(thrust::make_tuple(A.begin(), B.begin(), C.begin())),
+        thrust::make_zip_iterator(thrust::make_tuple(A.end(), B.end(), C.end())),
+        mod());
 
     // print the output
     std::cout << "N-ary functor" << std::endl;
