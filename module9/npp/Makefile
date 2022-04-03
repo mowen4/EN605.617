@@ -195,6 +195,8 @@ endif
 
 INCLUDES += -I../common/UtilNPP -I../common/FreeImage/include
 
+ALL_CCFLAGS += --std=c++11
+
 LIBRARIES += -L../common/FreeImage/lib/ -L../common/FreeImage/lib/$(TARGET_OS) -L../common/FreeImage/lib/$(TARGET_OS)/$(TARGET_ARCH) -lnppi_static -lnppc_static -lculibos -lfreeimage
 
 # Attempt to compile a minimal application linked against FreeImage. If a.out exists, FreeImage is properly set up.
