@@ -3,6 +3,7 @@
 #include <cuda_runtime.h>
 #include <helper_cuda.h>
 #include "nvgraph.h"
+#include <chrono>
 
 void check(nvgraphStatus_t status) {
     if (status != NVGRAPH_STATUS_SUCCESS) {
@@ -16,7 +17,7 @@ int main(int argc, char** argv) {
     void** vertex_dim;
     int sourceVertices = 0;
 
-
+    //read input "node" as the source node for analysis
     if (checkCmdLineFlag(argc, (const char**)argv, "node")) {
         sourceVertices = getCmdLineArgumentInt(argc, (const char**)argv, "node");
     }
@@ -24,21 +25,23 @@ int main(int argc, char** argv) {
         sourceVertices = 0;
     }
 
-
+    //set start time
+    auto start = high_resolution_clock::now();
+    
     // nvgraph variables
     nvgraphStatus_t status; nvgraphHandle_t handle;
     nvgraphGraphDescr_t graph;
     nvgraphCSCTopology32I_t CSC_input;
     cudaDataType_t edge_dimT = CUDA_R_32F;
     cudaDataType_t* vertex_dimT;
-    // Init host data
+    // initialize the graph data
     ssspBase = (float*)malloc(n * sizeof(float));
     vertex_dim = (void**)malloc(vertex_numsets * sizeof(void*));
     vertex_dimT = (cudaDataType_t*)malloc(vertex_numsets * sizeof(cudaDataType_t));
     CSC_input = (nvgraphCSCTopology32I_t)malloc(sizeof(struct nvgraphCSCTopology32I_st));
     vertex_dim[0] = (void*)ssspBase; vertex_dimT[0] = CUDA_R_32F;
-    float weights_h[] = { 0.333333, 0.5, 0.333333, 0.5, 0.5, 1.0, 0.333333, 0.5, 0.5, 0.5 };
-    int destination_offsets_h[] = { 0, 1, 3, 4, 6, 8, 10 };
+    float weights_h[] = { 0.2, 0.3, 0.4, 0.5, 0.5, 1.25, 0.77, 0.1, 0.1, 0.1 };
+    int destination_offsets_h[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
     int source_indices_h[] = { 2, 0, 2, 0, 4, 5, 2, 3, 3, 4 };
     check(nvgraphCreate(&handle));
     check(nvgraphCreateGraphDescr(handle, &graph));
@@ -56,6 +59,14 @@ int main(int argc, char** argv) {
     // Get and print result
     check(nvgraphGetVertexData(handle, graph, (void*)ssspBase, 0));
     printf("sssp_1_h \n"); for (int i = 0; i < 10; i++)  printf("%f\n", ssspBase[i]); printf("\n");
+    
+    auto stop = high_resolution_clock::now();
+
+    auto duration = duration_cast<microseconds>(stop - start);
+
+    std::cout << "Time taken by function: "
+        << (float)duration.count() / 1000000 << " seconds" << std::endl;
+    
     //Clean 
     free(ssspBase); free(vertex_dim);
     free(vertex_dimT); free(CSC_input);
