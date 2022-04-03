@@ -43,6 +43,7 @@ int main(int argc, char **argv) {
     check(nvgraphSssp(handle, graph, 0,  &source_vert, 0));
     // Get and print result
     check(nvgraphGetVertexData(handle, graph, (void*)sssp_1_h, 0));
+    printf("sssp_1_h \n"); for (i = 0; i<10; i++)  printf("%f\n",sssp_1_h[i]); printf("\n");
     //Clean 
     free(sssp_1_h); free(vertex_dim);
     free(vertex_dimT); free(CSC_input);
