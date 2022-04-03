@@ -125,16 +125,16 @@ int thruster(int n)
     //Mul
     thrust::for_each(thrust::make_zip_iterator(thrust::make_tuple(A.begin(), B.begin(), C.begin())),
         thrust::make_zip_iterator(thrust::make_tuple(A.end(), B.end(), C.end())),
-        mul());
+        mod());
     //Mod
     thrust::for_each(thrust::make_zip_iterator(thrust::make_tuple(A.begin(), B.begin(), C.begin())),
         thrust::make_zip_iterator(thrust::make_tuple(A.end(), B.end(), C.end())),
-        mod());
+        mul());
 
     // print the output
-    std::cout << "N-ary functor" << std::endl;
-    for (int i = 0; i < 5; i++)
-        std::cout << A[i] << " % " << B[i] << " = " << C[i] << std::endl;
+    std::cout << "3 input thrust function" << std::endl;
+    for (int i = 0; i < n; i++)
+        std::cout << A[i] << " * " << B[i] << " = " << C[i] << std::endl;
 
 
     return 0;
