@@ -18,7 +18,7 @@ int main(int argc, char** argv) {
 
 
     if (checkCmdLineFlag(argc, (const char**)argv, "node")) {
-        sourceVertices = getCmdLineArgumentInt(argc, (const char**)argv, "node";
+        sourceVertices = getCmdLineArgumentInt(argc, (const char**)argv, "node");
     }
     else {
         sourceVertices = 0;
