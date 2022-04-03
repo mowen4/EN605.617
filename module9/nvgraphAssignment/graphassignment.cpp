@@ -3,7 +3,6 @@
 #include <cuda_runtime.h>
 #include <helper_cuda.h>
 #include "nvgraph.h"
-
 void check(nvgraphStatus_t status) {
     if (status != NVGRAPH_STATUS_SUCCESS) {
         printf("ERROR : %d\n",status);
