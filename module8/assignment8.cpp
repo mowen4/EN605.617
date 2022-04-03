@@ -1,110 +1,168 @@
-/**
-* Assignment 8.
-* @author: Michael Owen
-* Code that will perform simple CUDA operations
-* using external libraries
-*
- */
 
- /* STD imports*/
-#include <stdio.h>
-#include <stdlib.h>
+#if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)
+#pragma warning(disable : 4819)
+#define WINDOWS_LEAN_AND_MEAN
+#define NOMINMAX
+#include <windows.h>
+#endif
+
+#include <Exceptions.h>
+#include <ImageIO.h>
+#include <ImagesCPU.h>
+#include <ImagesNPP.h>
+#include <helper_cuda.h>
+#include <npp.h>
 #include <string.h>
-#include <chrono>
+
+#include <fstream>
 #include <iostream>
+#include <string>
 
-/* Include CUDA */
-#include <cublas_v2.h>
-#include <cuda_runtime.h>
 using namespace std;
-using namespace std::chrono;
-/* Matrix size */
-#define N (3)
 
-// function for populating a and b arrays with specified data
-__host__ void generateData(float* h_a, float* h_b, float* h_c, int n2) {
+#if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)
+#define STRCASECMP _stricmp
+#define STRNCASECMP _strnicmp
+#else
+#define STRCASECMP strcasecmp
+#define STRNCASECMP strncasecmp
+#endif
 
-    for (int i = 0; i < n2; i++) {
-        h_a[i] = rand() / static_cast<float>(RAND_MAX);
-        h_b[i] = rand() / static_cast<float>(RAND_MAX);
-        h_c[i] = 0;
-    }
-}
+npp::ImageCPU_8u_C1 runNPP(npp::ImageNPP_8u_C1 oDeviceSrc) {
 
-void cuBLASRun(int n2) {
+    const int binCount = 255;
+    const int levelCount = binCount + 1;
 
-    float* h_a, * h_b, * h_c; //host pointers
-    float* d_a = 0;
-    float* d_b = 0;
-    float* d_c = 0;
-    float alpha = 1.0f;
-    float beta = 0.0f;
-    cublasHandle_t handle;
+    // allocate arrays for histogram and levels
 
-    cublasCreate(&handle);
+    Npp32s* histDevice = 0;
+    Npp32s* levelsDevice = 0;
 
-    // Allocate host mem for maxtric
-    h_a = reinterpret_cast<float*>(malloc(n2 * sizeof(h_a[0])));
-    h_b = reinterpret_cast<float*>(malloc(n2 * sizeof(h_b[0])));
-    h_c = reinterpret_cast<float*>(malloc(n2 * sizeof(h_c[0])));
+    cudaMalloc((void**)&histDevice, binCount * sizeof(Npp32s));
+    cudaMalloc((void**)&levelsDevice, levelCount * sizeof(Npp32s));
 
-    // Generate data
-    generateData(h_a, h_b, h_c, n2);
+    // compute histogram
+    NppiSize SizeRangeOfInterest = { (int)oDeviceSrc.width(), (int)oDeviceSrc.height() };
 
-    //Allocate Device Mem
-    cudaMalloc(reinterpret_cast<void**>(&d_a), n2 * sizeof(d_a[0]));
-    cudaMalloc(reinterpret_cast<void**>(&d_b), n2 * sizeof(d_b[0]));
-    cudaMalloc(reinterpret_cast<void**>(&d_c), n2 * sizeof(d_c[0]));
+    // create device scratch buffer for nppiHistogram
+    int nDeviceBufferSize;
+    nppiHistogramEvenGetBufferSize_8u_C1R(SizeRangeOfInterest, levelCount, &nDeviceBufferSize);
+    Npp8u* pDeviceBuffer;
+    cudaMalloc((void**)&pDeviceBuffer, nDeviceBufferSize);
 
-    //Set CUBLAS vectors
-    cublasSetVector(n2, sizeof(h_a[0]), h_a, 1, d_a, 1);
-    cublasSetVector(n2, sizeof(h_b[0]), h_b, 1, d_b, 1);
-    cublasSetVector(n2, sizeof(h_c[0]), h_c, 1, d_c, 1);
+    // compute levels values on host
+    Npp32s levelsHost[levelCount];
+    nppiEvenLevelsHost_32s(levelsHost, levelCount, 0, binCount);
+    // compute the histogram
+    nppiHistogramEven_8u_C1R(oDeviceSrc.data(), oDeviceSrc.pitch(), SizeRangeOfInterest, histDevice, levelCount, 0, binCount, pDeviceBuffer);
+    // copy histogram and levels to host memory
+    Npp32s h_hist[binCount];
+    cudaMemcpy(h_hist, histDevice, binCount * sizeof(Npp32s), cudaMemcpyDeviceToHost);
 
-    //Execute CUBLAS
-    cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, N, N, &alpha, d_a,
-        N, d_b, N, &beta, d_c, N);
+    Npp32s h_lookUpTable[levelCount];
 
-    //Read Back d_c to h_c
-    cublasGetVector(n2, sizeof(h_c[0]), d_c, 1, h_c, 1);
+    // generate lookup table
+    {
+        Npp32s* pHostHistogram = h_hist;
+        Npp32s totalSum = 0;
 
-    //clear memory
-    free(h_a);
-    free(h_b);
-    free(h_c);
-    cudaFree(d_a);
-    cudaFree(d_b);
-    cudaFree(d_c);
+        for (; pHostHistogram < h_hist + binCount; ++pHostHistogram) {
+            totalSum += *pHostHistogram;
+        }
 
-    //destroy cuBLAS
-    cublasDestroy(handle);
-}
+        totalSum <= SizeRangeOfInterest.width * SizeRangeOfInterest.height;
 
-//main and driver code
-int main(int argc, char** argv) {
-    
-    int n2 = N * N;
+        if (totalSum == 0) {
+            totalSum = 1;
+        }
 
-    // allow for changing the size of the matrix
-    if (argc == 2) {
+        float multiplier = 1.0f / float(SizeRangeOfInterest.width * SizeRangeOfInterest.height) * 0xFF;
 
-        int n = atoi(argv[1]);
-        n2 = n * n;
+        Npp32s runningSum = 0;
+        Npp32s* pLookupTable = h_lookUpTable;
 
-        printf("Matrix Dimension changed to:%i\n", n);
+        for (pHostHistogram = h_hist; pHostHistogram < h_hist + binCount;
+            ++pHostHistogram) {
+            *pLookupTable = (Npp32s)(runningSum * multiplier + 0.5f);
+            pLookupTable++;
+            runningSum += *pHostHistogram;
+        }
+
+        h_lookUpTable[binCount] = 0xFF;
     }
 
+    //
+    // apply LUT transformation and create the image in memory
+    npp::ImageNPP_8u_C1 oDeviceDst(oDeviceSrc.size());
 
-    auto start = high_resolution_clock::now();
-    cuBLASRun(n2);
-    auto stop = high_resolution_clock::now();
+    Npp32s* lutDevice = 0;
+    Npp32s* lvlsDevice = 0;
 
-    auto duration = duration_cast<microseconds>(stop - start);
+    cudaMalloc((void**)&lutDevice, sizeof(Npp32s) * (levelCount));
+    cudaMalloc((void**)&lvlsDevice, sizeof(Npp32s) * (levelCount));
 
-    cout << "Time taken by function: "
-        << (float) duration.count() / 1000000 << " seconds" << endl;
+    cudaMemcpy(lutDevice, h_lookUpTable, sizeof(Npp32s) * (levelCount), cudaMemcpyHostToDevice);
+    cudaMemcpy(lvlsDevice, levelsHost, sizeof(Npp32s) * (levelCount), cudaMemcpyHostToDevice);
+
+    nppiLUT_Linear_8u_C1R(oDeviceSrc.data(), oDeviceSrc.pitch(), oDeviceDst.data(), oDeviceDst.pitch(),
+        SizeRangeOfInterest, lutDevice, lvlsDevice, levelCount);
+
+    cudaFree(lutDevice);
+    cudaFree(lvlsDevice);
+
+    // copy the result image back into the storage that contained the
+    // input image
+    npp::ImageCPU_8u_C1 oHostDst(oDeviceDst.size());
+    oDeviceDst.copyTo(oHostDst.data(), oHostDst.pitch());
+
+    cudaFree(histDevice);
+    cudaFree(levelsDevice);
+    cudaFree(pDeviceBuffer);
+    nppiFree(oDeviceSrc.data());
+    nppiFree(oDeviceDst.data());
 
 
+    return oHostDst;
+}
+
+
+int main(int argc, char* argv[]) {
+
+    std::string sFilename;
+    char* filePath;
+
+    //get file input dir and location
+    if (checkCmdLineFlag(argc, (const char**)argv, "input")) {
+        getCmdLineArgumentString(argc, (const char**)argv, "input", &filePath);
+        sFilename = filePath;
+    }
+    else {
+        exit(EXIT_FAILURE);
+    }
+
+    // Read in file and set output file
+    std::ifstream infile(sFilename.data(), std::ifstream::in);
+    std::cout << "file open successfully: <" << sFilename.data() << std::endl;
+    std::string outFileName = sFilename;
+    std::string::size_type dot = outFileName.rfind('.');
+
+    if (dot != std::string::npos) {
+        outFileName = outFileName.substr(0, dot);
+    }
+    outFileName += "_histEQ.pgm";
+
+    npp::ImageCPU_8u_C1 oHostSrc;
+    npp::loadImage(sFilename, oHostSrc);
+    npp::ImageNPP_8u_C1 oDeviceSrc(oHostSrc);
+
+    npp::ImageCPU_8u_C1 outImage;
+
+    outImage = runNPP(oDeviceSrc);
+
+    // SAve the image out
+    npp::saveImage(outFileName.c_str(), outImage);
+    std::cout << "Saved image file " << outFileName << std::endl;
+    exit(EXIT_SUCCESS);
 
     return 0;
 }
