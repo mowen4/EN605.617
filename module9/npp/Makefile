@@ -1,5 +1,5 @@
 # Location of the CUDA Toolkit
-CUDA_PATH ?= /usr/local/cuda
+CUDA_PATH?=/usr/local/cuda
 
 ##############################
 # start deprecated interface #
@@ -39,9 +39,9 @@ endif
 # architecture
 HOST_ARCH   := $(shell uname -m)
 TARGET_ARCH ?= $(HOST_ARCH)
-ifneq (,$(filter $(TARGET_ARCH),x86_64 aarch64 sbsa ppc64le armv7l))
+ifneq (,$(filter $(TARGET_ARCH),x86_64 aarch64 ppc64le armv7l))
     ifneq ($(TARGET_ARCH),$(HOST_ARCH))
-        ifneq (,$(filter $(TARGET_ARCH),x86_64 aarch64 sbsa ppc64le))
+        ifneq (,$(filter $(TARGET_ARCH),x86_64 aarch64 ppc64le))
             TARGET_SIZE := 64
         else ifneq (,$(filter $(TARGET_ARCH),armv7l))
             TARGET_SIZE := 32
@@ -52,17 +52,8 @@ ifneq (,$(filter $(TARGET_ARCH),x86_64 aarch64 sbsa ppc64le armv7l))
 else
     $(error ERROR - unsupported value $(TARGET_ARCH) for TARGET_ARCH!)
 endif
-
-# sbsa and aarch64 systems look similar. Need to differentiate them at host level for now.
-ifeq ($(HOST_ARCH),aarch64)
-    ifeq ($(CUDA_PATH)/targets/sbsa-linux,$(shell ls -1d $(CUDA_PATH)/targets/sbsa-linux 2>/dev/null))
-        HOST_ARCH := sbsa
-        TARGET_ARCH := sbsa
-    endif
-endif
-
 ifneq ($(TARGET_ARCH),$(HOST_ARCH))
-    ifeq (,$(filter $(HOST_ARCH)-$(TARGET_ARCH),aarch64-armv7l x86_64-armv7l x86_64-aarch64 x86_64-sbsa x86_64-ppc64le))
+    ifeq (,$(filter $(HOST_ARCH)-$(TARGET_ARCH),aarch64-armv7l x86_64-armv7l x86_64-aarch64 x86_64-ppc64le))
         $(error ERROR - cross compiling from $(HOST_ARCH) to $(TARGET_ARCH) is not supported!)
     endif
 endif
@@ -113,12 +104,10 @@ else ifneq ($(TARGET_ARCH),$(HOST_ARCH))
             endif
             export QNX_HOST
             export QNX_TARGET
-            HOST_COMPILER ?= $(QNX_HOST)/usr/bin/q++
+            HOST_COMPILER ?= $(QNX_HOST)/usr/bin/aarch64-unknown-nto-qnx7.0.0-g++
         else ifeq ($(TARGET_OS), android)
-            HOST_COMPILER ?= aarch64-linux-android-clang++
+            HOST_COMPILER ?= aarch64-linux-android-g++
         endif
-    else ifeq ($(TARGET_ARCH),sbsa)
-        HOST_COMPILER ?= aarch64-linux-gnu-g++
     else ifeq ($(TARGET_ARCH),ppc64le)
         HOST_COMPILER ?= powerpc64le-linux-gnu-g++
     endif
@@ -156,65 +145,6 @@ ifneq ($(TARGET_ARCH),$(HOST_ARCH))
             LDFLAGS += -rpath-link=$(TARGET_FS)/usr/lib/arm-linux-gnueabihf
         endif
     endif
-    ifeq ($(TARGET_ARCH)-$(TARGET_OS),aarch64-linux)
-        ifneq ($(TARGET_FS),)
-            GCCVERSIONLTEQ46 := $(shell expr `$(HOST_COMPILER) -dumpversion` \<= 4.6)
-            ifeq ($(GCCVERSIONLTEQ46),1)
-                CCFLAGS += --sysroot=$(TARGET_FS)
-            endif
-            LDFLAGS += --sysroot=$(TARGET_FS)
-            LDFLAGS += -rpath-link=$(TARGET_FS)/lib -L$(TARGET_FS)/lib
-            LDFLAGS += -rpath-link=$(TARGET_FS)/lib/aarch64-linux-gnu -L$(TARGET_FS)/lib/aarch64-linux-gnu
-            LDFLAGS += -rpath-link=$(TARGET_FS)/usr/lib -L$(TARGET_FS)/usr/lib
-            LDFLAGS += -rpath-link=$(TARGET_FS)/usr/lib/aarch64-linux-gnu -L$(TARGET_FS)/usr/lib/aarch64-linux-gnu
-            LDFLAGS += --unresolved-symbols=ignore-in-shared-libs
-            CCFLAGS += -isystem=$(TARGET_FS)/usr/include -I$(TARGET_FS)/usr/include -I$(TARGET_FS)/usr/include/libdrm
-            CCFLAGS += -isystem=$(TARGET_FS)/usr/include/aarch64-linux-gnu -I$(TARGET_FS)/usr/include/aarch64-linux-gnu
-        endif
-    endif
-    ifeq ($(TARGET_ARCH)-$(TARGET_OS),aarch64-qnx)
-        NVCCFLAGS += -D_QNX_SOURCE
-        NVCCFLAGS += --qpp-config 8.3.0,gcc_ntoaarch64le
-        CCFLAGS += -DWIN_INTERFACE_CUSTOM -I/usr/include/aarch64-qnx-gnu
-        LDFLAGS += -lsocket
-        LDFLAGS += -L/usr/lib/aarch64-qnx-gnu
-        CCFLAGS += "-Wl\,-rpath-link\,/usr/lib/aarch64-qnx-gnu"
-        ifdef TARGET_OVERRIDE
-            LDFLAGS += -lslog2
-        endif
-
-        ifneq ($(TARGET_FS),)
-            LDFLAGS += -L$(TARGET_FS)/usr/lib
-            CCFLAGS += "-Wl\,-rpath-link\,$(TARGET_FS)/usr/lib"
-            LDFLAGS += -L$(TARGET_FS)/usr/libnvidia
-            CCFLAGS += "-Wl\,-rpath-link\,$(TARGET_FS)/usr/libnvidia"
-            CCFLAGS += -I$(TARGET_FS)/../include
-        endif
-    endif
-endif
-
-ifdef TARGET_OVERRIDE # cuda toolkit targets override
-    NVCCFLAGS += -target-dir $(TARGET_OVERRIDE)
-endif
-
-# Install directory of different arch
-CUDA_INSTALL_TARGET_DIR :=
-ifeq ($(TARGET_ARCH)-$(TARGET_OS),armv7l-linux)
-    CUDA_INSTALL_TARGET_DIR = targets/armv7-linux-gnueabihf/
-else ifeq ($(TARGET_ARCH)-$(TARGET_OS),aarch64-linux)
-    CUDA_INSTALL_TARGET_DIR = targets/aarch64-linux/
-else ifeq ($(TARGET_ARCH)-$(TARGET_OS),sbsa-linux)
-    CUDA_INSTALL_TARGET_DIR = targets/sbsa-linux/
-else ifeq ($(TARGET_ARCH)-$(TARGET_OS),armv7l-android)
-    CUDA_INSTALL_TARGET_DIR = targets/armv7-linux-androideabi/
-else ifeq ($(TARGET_ARCH)-$(TARGET_OS),aarch64-android)
-    CUDA_INSTALL_TARGET_DIR = targets/aarch64-linux-androideabi/
-else ifeq ($(TARGET_ARCH)-$(TARGET_OS),armv7l-qnx)
-    CUDA_INSTALL_TARGET_DIR = targets/ARMv7-linux-QNX/
-else ifeq ($(TARGET_ARCH)-$(TARGET_OS),aarch64-qnx)
-    CUDA_INSTALL_TARGET_DIR = targets/aarch64-qnx/
-else ifeq ($(TARGET_ARCH),ppc64le)
-    CUDA_INSTALL_TARGET_DIR = targets/ppc64le-linux/
 endif
 
 # Debug build flags
@@ -233,19 +163,13 @@ ALL_CCFLAGS += $(addprefix -Xcompiler ,$(EXTRA_CCFLAGS))
 
 SAMPLE_ENABLED := 1
 
-# This sample is not supported on QNX
-ifeq ($(TARGET_OS),qnx)
-  $(info >>> WARNING - histEqualizationNPP is not supported on QNX - waiving sample <<<)
-  SAMPLE_ENABLED := 0
-endif
-
 ALL_LDFLAGS :=
 ALL_LDFLAGS += $(ALL_CCFLAGS)
 ALL_LDFLAGS += $(addprefix -Xlinker ,$(LDFLAGS))
 ALL_LDFLAGS += $(addprefix -Xlinker ,$(EXTRA_LDFLAGS))
 
 # Common includes and paths for CUDA
-INCLUDES  := -I../../../Common
+INCLUDES  := -I../../common/inc
 LIBRARIES :=
 
 ################################################################################
@@ -258,13 +182,8 @@ ifeq ($(GENCODE_FLAGS),)
 $(foreach sm,$(SMS),$(eval GENCODE_FLAGS += -gencode arch=compute_$(sm),code=sm_$(sm)))
 
 ifeq ($(SMS),)
-ifeq ($(TARGET_ARCH),$(filter $(TARGET_ARCH),armv7l aarch64 sbsa))
-# Generate PTX code from SM 53
-GENCODE_FLAGS += -gencode arch=compute_53,code=compute_53
-else
-# Generate PTX code from SM 35
-GENCODE_FLAGS += -gencode arch=compute_35,code=compute_35
-endif
+# Generate PTX code from SM 20
+GENCODE_FLAGS += -gencode arch=compute_20,code=compute_20
 endif
 
 # Generate PTX code from the highest SM architecture in $(SMS) to guarantee forward-compatibility
@@ -274,14 +193,12 @@ GENCODE_FLAGS += -gencode arch=compute_$(HIGHEST_SM),code=compute_$(HIGHEST_SM)
 endif
 endif
 
-ALL_CCFLAGS += --threads 0 --std=c++11
+INCLUDES += -I../common/UtilNPP -I../common/FreeImage/include
 
-INCLUDES += -I../../../Common/UtilNPP
-
-LIBRARIES += -lnppisu -lnppist -lnppicc -lnppc -lfreeimage
+LIBRARIES += -L../common/FreeImage/lib/ -L../common/FreeImage/lib/$(TARGET_OS) -L../common/FreeImage/lib/$(TARGET_OS)/$(TARGET_ARCH) -lnppi_static -lnppc_static -lculibos -lfreeimage
 
 # Attempt to compile a minimal application linked against FreeImage. If a.out exists, FreeImage is properly set up.
-$(shell echo "#include \"FreeImage.h\"" > test.c; echo "int main() { return 0; }" >> test.c ; $(NVCC) $(ALL_CCFLAGS) $(INCLUDES) $(ALL_LDFLAGS) $(LIBRARIES) -l freeimage test.c)
+$(shell echo "#include \"FreeImage.h\"" > test.c; echo "int main() { return 0; }" >> test.c ; $(NVCC) $(ALL_CCFLAGS) $(INCLUDES) $(LIBRARIES) -l freeimage test.c)
 FREEIMAGE := $(shell find a.out 2>/dev/null)
 $(shell rm a.out test.c 2>/dev/null)
 
@@ -299,7 +216,7 @@ endif
 # Target rules
 all: build
 
-build: histEqualizationNPP
+build: nppassignment
 
 check.deps:
 ifeq ($(SAMPLE_ENABLED),0)
@@ -308,21 +225,19 @@ else
 	@echo "Sample is ready - all dependencies have been met"
 endif
 
-histEqualizationNPP.o:histEqualizationNPP.cpp
+nppassignment.o:nppassignment.cpp
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
 
-histEqualizationNPP: histEqualizationNPP.o
+nppassignment: nppassignment.o
 	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
-	$(EXEC) mkdir -p ../../../bin/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
-	$(EXEC) cp $@ ../../../bin/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
+	$(EXEC) mkdir -p ../../bin/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
+	$(EXEC) cp $@ ../../bin/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
 
 run: build
-	$(EXEC) ./histEqualizationNPP
-
-testrun: build
+	$(EXEC) ./nppassignment
 
 clean:
-	rm -f histEqualizationNPP histEqualizationNPP.o
-	rm -rf ../../../bin/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)/histEqualizationNPP
+	rm -f nppassignment nppassignment.o
+	rm -rf ../../bin/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)/boxFilterNPP
 
 clobber: clean
