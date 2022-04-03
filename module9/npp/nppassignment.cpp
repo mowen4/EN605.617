@@ -78,7 +78,7 @@ int main(int argc, char* argv[]) {
     Npp32s levelsHost[levelCount];
     nppiEvenLevelsHost_32s(levelsHost, levelCount, 0, binCount);
     // compute the histogram
-    nppiHistogramEven_8u_C1R(oDeviceSrc.data(), oDeviceSrc.pitch(), oSizeROI, histDevice, levelCount, 0, binCount, pDeviceBuffer));
+    nppiHistogramEven_8u_C1R(oDeviceSrc.data(), oDeviceSrc.pitch(), oSizeROI, histDevice, levelCount, 0, binCount, pDeviceBuffer);
     // copy histogram and levels to host memory
     Npp32s h_hist[binCount];
     cudaMemcpy(h_hist, histDevice, binCount * sizeof(Npp32s),cudaMemcpyDeviceToHost);
