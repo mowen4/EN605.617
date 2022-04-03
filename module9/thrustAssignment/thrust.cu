@@ -33,44 +33,44 @@ struct arbitrary_functor1
     }
 };
 
-#if THRUST_CPP_DIALECT >= 2011 && !defined(THRUST_LEGACY_GCC)
-struct add
-{
-    __host__ __device__
-        void operator()(const int& a, const int& b, int& c)
-    {
-        c = a + b;
-    }
-};
-
-struct sub
-{
-    __host__ __device__
-        void operator()(const int& a, const int& b, int& c)
-    {
-        c = a - b;
-    }
-};
-
-struct mul
-{
-    __host__ __device__
-        void operator()(const int& a, const int& b, int& c)
-    {
-        c = a * b;
-    }
-};
-
-struct mod
-{
-    __host__ __device__
-        void operator()(const int& a, const int& b, int& c)
-    {
-        c = a % b;
-    }
-};
-
-#endif // >= C++11
+//#if THRUST_CPP_DIALECT >= 2011 && !defined(THRUST_LEGACY_GCC)
+//struct add
+//{
+//    __host__ __device__
+//        void operator()(const int& a, const int& b, int& c)
+//    {
+//        c = a + b;
+//    }
+//};
+//
+//struct sub
+//{
+//    __host__ __device__
+//        void operator()(const int& a, const int& b, int& c)
+//    {
+//        c = a - b;
+//    }
+//};
+//
+//struct mul
+//{
+//    __host__ __device__
+//        void operator()(const int& a, const int& b, int& c)
+//    {
+//        c = a * b;
+//    }
+//};
+//
+//struct mod
+//{
+//    __host__ __device__
+//        void operator()(const int& a, const int& b, int& c)
+//    {
+//        c = a % b;
+//    }
+//};
+//
+//#endif // >= C++11
 
 int thruster(int n)
 {
@@ -84,19 +84,19 @@ int thruster(int n)
     //Add
     thrust::for_each(thrust::make_zip_iterator(thrust::make_tuple(A.begin(), B.begin(), C.begin())),
         thrust::make_zip_iterator(thrust::make_tuple(A.end(), B.end(), C.end())),
-        thrust::make_zip_function(add()));
-    //Sub
-    thrust::for_each(thrust::make_zip_iterator(thrust::make_tuple(A.begin(), B.begin(), C.begin())),
-        thrust::make_zip_iterator(thrust::make_tuple(A.end(), B.end(), C.end())),
-        thrust::make_zip_function(sub()));
-    //Mul
-    thrust::for_each(thrust::make_zip_iterator(thrust::make_tuple(A.begin(), B.begin(), C.begin())),
-        thrust::make_zip_iterator(thrust::make_tuple(A.end(), B.end(), C.end())),
-        thrust::make_zip_function(mul()));
-    //Mod
-    thrust::for_each(thrust::make_zip_iterator(thrust::make_tuple(A.begin(), B.begin(), C.begin())),
-        thrust::make_zip_iterator(thrust::make_tuple(A.end(), B.end(), C.end())),
-        thrust::make_zip_function(mod()));
+        arbitrary_functor1());
+    ////Sub
+    //thrust::for_each(thrust::make_zip_iterator(thrust::make_tuple(A.begin(), B.begin(), C.begin())),
+    //    thrust::make_zip_iterator(thrust::make_tuple(A.end(), B.end(), C.end())),
+    //    thrust::make_zip_function(sub()));
+    ////Mul
+    //thrust::for_each(thrust::make_zip_iterator(thrust::make_tuple(A.begin(), B.begin(), C.begin())),
+    //    thrust::make_zip_iterator(thrust::make_tuple(A.end(), B.end(), C.end())),
+    //    thrust::make_zip_function(mul()));
+    ////Mod
+    //thrust::for_each(thrust::make_zip_iterator(thrust::make_tuple(A.begin(), B.begin(), C.begin())),
+    //    thrust::make_zip_iterator(thrust::make_tuple(A.end(), B.end(), C.end())),
+    //    thrust::make_zip_function(mod()));
 
     // print the output
     std::cout << "N-ary functor" << std::endl;
