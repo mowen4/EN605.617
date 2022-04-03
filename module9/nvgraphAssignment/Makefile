@@ -251,7 +251,7 @@ endif
 # Target rules
 all: build
 
-build: nvgraph_Pagerank
+build: nvgraphAssignment
 
 check.deps:
 ifeq ($(SAMPLE_ENABLED),0)
@@ -260,19 +260,19 @@ else
 	@echo "Sample is ready - all dependencies have been met"
 endif
 
-nvgraph_Pagerank.o:nvgraph_Pagerank.cpp
+nvgraphAssignment.o:nvgraphAssignment.cpp
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
 
-nvgraph_Pagerank: nvgraph_Pagerank.o
+nvgraphAssignment: nvgraphAssignment.o
 	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
 	$(EXEC) mkdir -p ../../bin/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
 	$(EXEC) cp $@ ../../bin/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
 
 run: build
-	$(EXEC) ./nvgraph_Pagerank
+	$(EXEC) ./nvgraphAssignment
 
 clean:
-	rm -f nvgraph_Pagerank nvgraph_Pagerank.o
-	rm -rf ../../bin/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)/nvgraph_Pagerank
+	rm -f nvgraphAssignment nvgraphAssignment.o
+	rm -rf ../../bin/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)/nvgraphAssignment
 
 clobber: clean
