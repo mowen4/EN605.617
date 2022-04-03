@@ -32,6 +32,7 @@ int main(int argc, char* argv[]) {
     std::string sFilename;
     char* filePath;
 
+    //get file input dir and location
     if (checkCmdLineFlag(argc, (const char**)argv, "input")) {
         getCmdLineArgumentString(argc, (const char**)argv, "input", &filePath);
         sFilename = filePath;
@@ -40,31 +41,10 @@ int main(int argc, char* argv[]) {
         exit(EXIT_FAILURE);
     }
 
-
-    // if we specify the filename at the command line, then we only test
-    // sFilename.
-    int file_errors = 0;
+    // Read in file
     std::ifstream infile(sFilename.data(), std::ifstream::in);
-
-    if (infile.good()) {
-        std::cout << "histEqualizationNPP opened: <" << sFilename.data()
-            << "> successfully!" << std::endl;
-        file_errors = 0;
-        infile.close();
-    }
-    else {
-        std::cout << "histEqualizationNPP unable to open: <" << sFilename.data()
-            << ">" << std::endl;
-        file_errors++;
-        infile.close();
-    }
-
-    if (file_errors > 0) {
-        exit(EXIT_FAILURE);
-    }
-
+    std::cout << "histEqualizationNPP opened: <" << sFilename.data() << std::endl;
     std::string dstFileName = sFilename;
-
     std::string::size_type dot = dstFileName.rfind('.');
 
     if (dot != std::string::npos) {
