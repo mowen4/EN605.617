@@ -84,13 +84,13 @@ int main(int argc, char *argv[]) {
     if (checkCmdLineFlag(argc, (const char **)argv, "input")) {
       getCmdLineArgumentString(argc, (const char **)argv, "input", &filePath);
     } else {
-      filePath = sdkFindFilePath("lena.pgm", argv[0]);
+      filePath = sdkFindFilePath("Lena.pgm", argv[0]);
     }
 
     if (filePath) {
       sFilename = filePath;
     } else {
-      sFilename = "lena.pgm";
+      sFilename = "Lena.pgm";
     }
 
     // if we specify the filename at the command line, then we only test
