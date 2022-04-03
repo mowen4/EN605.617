@@ -34,17 +34,12 @@ int main(int argc, char* argv[]) {
 
     if (checkCmdLineFlag(argc, (const char**)argv, "input")) {
         getCmdLineArgumentString(argc, (const char**)argv, "input", &filePath);
-    }
-    else {
-        filePath = sdkFindFilePath("Lena.pgm", argv[0]);
-    }
-
-    if (filePath) {
         sFilename = filePath;
     }
     else {
-        sFilename = "Lena.pgm";
+        exit(EXIT_FAILURE);
     }
+
 
     // if we specify the filename at the command line, then we only test
     // sFilename.
@@ -76,7 +71,7 @@ int main(int argc, char* argv[]) {
         dstFileName = dstFileName.substr(0, dot);
     }
 
-    dstFileName += "_histEqualization.pgm";
+    dstFileName += "_histEQ.pgm";
 
     npp::ImageCPU_8u_C1 oHostSrc;
     npp::loadImage(sFilename, oHostSrc);
@@ -100,8 +95,8 @@ int main(int argc, char* argv[]) {
     // compute histogram
     //
 
-    NppiSize oSizeROI = { (int)oDeviceSrc.width(),
-                            (int)oDeviceSrc.height() };  // full image
+    NppiSize oSizeROI = { (int)oDeviceSrc.width(), (int)oDeviceSrc.height() };
+
     // create device scratch buffer for nppiHistogram
     int nDeviceBufferSize;
     nppiHistogramEvenGetBufferSize_8u_C1R(oSizeROI, levelCount,
