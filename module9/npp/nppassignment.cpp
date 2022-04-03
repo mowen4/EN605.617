@@ -12,13 +12,14 @@
 #include <ImagesNPP.h>
 #include <helper_cuda.h>
 #include <npp.h>
+#include <chrono>
 #include <string.h>
 
 #include <fstream>
 #include <iostream>
 #include <string>
 
-using namespace std;
+using namespace std::chrono;
 
 #if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)
 #define STRCASECMP _stricmp
@@ -63,6 +64,8 @@ int main(int argc, char* argv[]) {
     npp::ImageNPP_8u_C1 oDeviceSrc(oHostSrc);
 
     // allocate arrays for histogram and levels
+
+    auto start = high_resolution_clock::now();
 
     Npp32s* histDevice = 0;
     Npp32s* levelsDevice = 0;
@@ -152,8 +155,14 @@ int main(int argc, char* argv[]) {
 
     // SAve the image out
     npp::saveImage(outFileName.c_str(), oHostDst);
-    std::cout << "Saved image file " << outFileName << std::endl;
-    exit(EXIT_SUCCESS);
+    std::cout << "Transformed Saved to " << outFileName << std::endl;
+
+    auto stop = high_resolution_clock::now();
+
+    auto duration = duration_cast<microseconds>(stop - start);
+
+    std::cout << "Time taken by function: "
+        << (float)duration.count() / 1000000 << " seconds" << std::endl;
 
     return 0;
 }
