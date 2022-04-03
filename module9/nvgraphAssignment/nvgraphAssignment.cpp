@@ -4,6 +4,9 @@
 #include <helper_cuda.h>
 #include "nvgraph.h"
 #include <chrono>
+#include <fstream>
+#include <iostream>
+#include <string>
 
 using namespace std::chrono;
 
