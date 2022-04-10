@@ -272,7 +272,7 @@ int main(int argc, char** argv)
         kernel = clCreateKernel(program, kernelType[i], NULL);
 
         float result[size]; float a[size]; float b[size];
-        createInputs(*a, *b, *result, size);
+        createInputs(&a, &b, &result, size);
 
         CreateMemObjects(context, memObjects, a, b, size);
 
