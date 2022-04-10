@@ -256,19 +256,18 @@ int main(int argc, char** argv)
     cl_mem memObjects[3] = { 0, 0, 0 };
     cl_int errNum;
 
-
-    auto start = high_resolution_clock::now();
-    // Create an OpenCL context on first available platform
-    context = CreateContext();
-
-    // Create a command-queue on the first device available
-    // on the created context
-    commandQueue = CreateCommandQueue(context, &device);
-
-    // Create OpenCL program from HelloWorld.cl kernel source
-    program = CreateProgram(context, device, "HelloWorld.cl");
-
     for (int i = 0; i < 5; i++) {
+        auto start = high_resolution_clock::now();
+        // Create an OpenCL context on first available platform
+        context = CreateContext();
+
+        // Create a command-queue on the first device available
+        // on the created context
+        commandQueue = CreateCommandQueue(context, &device);
+
+        // Create OpenCL program from HelloWorld.cl kernel source
+        program = CreateProgram(context, device, "HelloWorld.cl");
+
         // Create OpenCL kernel
         kernel = clCreateKernel(program, kernelType[i], NULL);
 
