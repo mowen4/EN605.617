@@ -227,6 +227,15 @@ void Cleanup(cl_context context, cl_command_queue commandQueue,
 
 }
 
+void createInputs(float* a, float* b, float* result, int size)
+{
+    for (int i = 0; i < size; i++)
+    {
+        a[i] = (float)i;
+        b[i] = (float)(i * 2);
+    }
+}
+
 ///
 //	main() for HelloWorld example
 //
@@ -262,41 +271,16 @@ int main(int argc, char** argv)
 
         // Create OpenCL kernel
         kernel = clCreateKernel(program, kernelType[i], NULL);
-        if (kernel == NULL)
-        {
-            std::cerr << "Failed to create kernel" << std::endl;
-            Cleanup(context, commandQueue, program, kernel, memObjects);
-            return 1;
-        }
 
-        // Create memory objects that will be used as arguments to
-        // kernel.  First create host memory arrays that will be
-        // used to store the arguments to the kernel
-        float result[size];
-        float a[size];
-        float b[size];
-        for (int i = 0; i < size; i++)
-        {
-            a[i] = (float)i;
-            b[i] = (float)(i * 2);
-        }
+        float result[size]; float a[size]; float b[size];
+        createInputs(*a, *b, *result, size);
 
-        if (!CreateMemObjects(context, memObjects, a, b, size))
-        {
-            Cleanup(context, commandQueue, program, kernel, memObjects);
-            return 1;
-        }
+        CreateMemObjects(context, memObjects, a, b, size)
 
         // Set the kernel arguments (result, a, b)
         errNum = clSetKernelArg(kernel, 0, sizeof(cl_mem), &memObjects[0]);
         errNum |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &memObjects[1]);
         errNum |= clSetKernelArg(kernel, 2, sizeof(cl_mem), &memObjects[2]);
-        if (errNum != CL_SUCCESS)
-        {
-            std::cerr << "Error setting kernel arguments." << std::endl;
-            Cleanup(context, commandQueue, program, kernel, memObjects);
-            return 1;
-        }
 
         size_t globalWorkSize[1] = { size };
         size_t localWorkSize[1] = { 1 };
@@ -305,23 +289,11 @@ int main(int argc, char** argv)
         errNum = clEnqueueNDRangeKernel(commandQueue, kernel, 1, NULL,
             globalWorkSize, localWorkSize,
             0, NULL, NULL);
-        if (errNum != CL_SUCCESS)
-        {
-            std::cerr << "Error queuing kernel for execution." << std::endl;
-            Cleanup(context, commandQueue, program, kernel, memObjects);
-            return 1;
-        }
 
         // Read the output buffer back to the Host
         errNum = clEnqueueReadBuffer(commandQueue, memObjects[2], CL_TRUE,
             0, size * sizeof(float), result,
             0, NULL, NULL);
-        if (errNum != CL_SUCCESS)
-        {
-            std::cerr << "Error reading result buffer." << std::endl;
-            Cleanup(context, commandQueue, program, kernel, memObjects);
-            return 1;
-        }
 
         // Output the result buffer
         for (int i = 0; i < size; i++)
