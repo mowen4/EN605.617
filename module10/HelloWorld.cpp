@@ -16,6 +16,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <chrono>
 
 #ifdef __APPLE__
 #include <OpenCL/cl.h>
@@ -23,10 +24,12 @@
 #include <CL/cl.h>
 #endif
 
+using namespace std::chrono
+
 ///
 //  Constants
 //
-const int ARRAY_SIZE = 1000;
+//const int size = 1000;
 
 ///
 //  Create an OpenCL context on the first available platform using
@@ -181,11 +184,11 @@ bool CreateMemObjects(cl_context context, cl_mem memObjects[3],
                       float *a, float *b)
 {
     memObjects[0] = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-                                   sizeof(float) * ARRAY_SIZE, a, NULL);
+                                   sizeof(float) * size, a, NULL);
     memObjects[1] = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-                                   sizeof(float) * ARRAY_SIZE, b, NULL);
+                                   sizeof(float) * size, b, NULL);
     memObjects[2] = clCreateBuffer(context, CL_MEM_READ_WRITE,
-                                   sizeof(float) * ARRAY_SIZE, NULL, NULL);
+                                   sizeof(float) * size, NULL, NULL);
 
     if (memObjects[0] == NULL || memObjects[1] == NULL || memObjects[2] == NULL)
     {
@@ -226,6 +229,14 @@ void Cleanup(cl_context context, cl_command_queue commandQueue,
 //
 int main(int argc, char** argv)
 {
+    if (checkCmdLineFlag(argc, (const char**)argv, "size")) {
+        size = getCmdLineArgumentInt(argc, (const char**)argv, "size");
+    }
+    else {
+        size = 10;
+    }
+    
+    
     cl_context context = 0;
     cl_command_queue commandQueue = 0;
     cl_program program = 0;
@@ -252,7 +263,7 @@ int main(int argc, char** argv)
     }
 
     // Create OpenCL program from HelloWorld.cl kernel source
-    program = CreateProgram(context, device, "HelloWorld.cl");
+    program = CreateProgram(context, device, "div.cl");
     if (program == NULL)
     {
         Cleanup(context, commandQueue, program, kernel, memObjects);
@@ -260,7 +271,7 @@ int main(int argc, char** argv)
     }
 
     // Create OpenCL kernel
-    kernel = clCreateKernel(program, "hello_kernel", NULL);
+    kernel = clCreateKernel(program, "div_kernel", NULL);
     if (kernel == NULL)
     {
         std::cerr << "Failed to create kernel" << std::endl;
@@ -271,10 +282,10 @@ int main(int argc, char** argv)
     // Create memory objects that will be used as arguments to
     // kernel.  First create host memory arrays that will be
     // used to store the arguments to the kernel
-    float result[ARRAY_SIZE];
-    float a[ARRAY_SIZE];
-    float b[ARRAY_SIZE];
-    for (int i = 0; i < ARRAY_SIZE; i++)
+    float result[size];
+    float a[size];
+    float b[size];
+    for (int i = 0; i < size; i++)
     {
         a[i] = (float)i;
         b[i] = (float)(i * 2);
@@ -297,7 +308,7 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    size_t globalWorkSize[1] = { ARRAY_SIZE };
+    size_t globalWorkSize[1] = { size };
     size_t localWorkSize[1] = { 1 };
 
     // Queue the kernel up for execution across the array
@@ -313,7 +324,7 @@ int main(int argc, char** argv)
 
     // Read the output buffer back to the Host
     errNum = clEnqueueReadBuffer(commandQueue, memObjects[2], CL_TRUE,
-                                 0, ARRAY_SIZE * sizeof(float), result,
+                                 0, size * sizeof(float), result,
                                  0, NULL, NULL);
     if (errNum != CL_SUCCESS)
     {
@@ -323,7 +334,7 @@ int main(int argc, char** argv)
     }
 
     // Output the result buffer
-    for (int i = 0; i < ARRAY_SIZE; i++)
+    for (int i = 0; i < size; i++)
     {
         std::cout << result[i] << " ";
     }
