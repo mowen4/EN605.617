@@ -331,7 +331,6 @@ int main(int argc, char** argv)
         std::cout << std::endl;
         std::cout << "Executed program succesfully." << std::endl;
         Cleanup(context, commandQueue, program, kernel, memObjects);
-        free(result); free(a); free(b);
 
     }
 
