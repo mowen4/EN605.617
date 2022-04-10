@@ -238,7 +238,7 @@ int main(int argc, char** argv)
         size = getCmdLineArgumentInt(argc, (const char**)argv, "size");
     }
     
-    const char *kernelType[5] = {"add.cl", "sub.cl", "div.cl", "mul.cl", "pow.cl"}
+    const char* kernelType[5] = { "add.cl", "sub.cl", "div.cl", "mul.cl", "pow.cl" };
 
     cl_context context = 0;
     cl_command_queue commandQueue = 0;
