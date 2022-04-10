@@ -236,16 +236,9 @@ void createInputs(float* a, float* b, float* result, int size)
     }
 }
 
-///
-//	main() for HelloWorld example
-//
-int main(int argc, char** argv)
-{
-    //check for default size change
-    int size = 10;
-    if (checkCmdLineFlag(argc, (const char**)argv, "size")) {
-        size = getCmdLineArgumentInt(argc, (const char**)argv, "size");
-    }
+int runKernels(int size) {
+
+    //kernel names in an arrray for looping
     const char* kernelType[5] = { "add_kernel", "sub_kernel", "div_kernel", "mul_kernel", "pow_kernel" };
     //CL overhead variable initialization
     cl_context context = 0;
@@ -307,6 +300,21 @@ int main(int argc, char** argv)
         Cleanup(context, commandQueue, program, kernel, memObjects);
 
     }
+
+}
+
+///
+//	main() for HelloWorld example
+//
+int main(int argc, char** argv)
+{
+    //check for default size change
+    int size = 10;
+    if (checkCmdLineFlag(argc, (const char**)argv, "size")) {
+        size = getCmdLineArgumentInt(argc, (const char**)argv, "size");
+    }
+
+    runKernels(size);
 
     return 0;
 }
