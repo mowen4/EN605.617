@@ -274,7 +274,7 @@ int main(int argc, char** argv)
         float result[size]; float a[size]; float b[size];
         createInputs(*a, *b, *result, size);
 
-        CreateMemObjects(context, memObjects, a, b, size)
+        CreateMemObjects(context, memObjects, a, b, size);
 
         // Set the kernel arguments (result, a, b)
         errNum = clSetKernelArg(kernel, 0, sizeof(cl_mem), &memObjects[0]);
