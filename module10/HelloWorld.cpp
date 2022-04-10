@@ -241,14 +241,13 @@ void createInputs(float* a, float* b, float* result, int size)
 //
 int main(int argc, char** argv)
 {
+    //check for default size change
     int size = 10;
-
     if (checkCmdLineFlag(argc, (const char**)argv, "size")) {
         size = getCmdLineArgumentInt(argc, (const char**)argv, "size");
     }
-    
     const char* kernelType[5] = { "add_kernel", "sub_kernel", "div_kernel", "mul_kernel", "pow_kernel" };
-
+    //CL overhead variable initialization
     cl_context context = 0;
     cl_command_queue commandQueue = 0;
     cl_program program = 0;
@@ -258,7 +257,7 @@ int main(int argc, char** argv)
     cl_int errNum;
 
     for (int i = 0; i < 5; i++) {
-
+        auto start = high_resolution_clock::now();
         // Create an OpenCL context on first available platform
         context = CreateContext();
 
@@ -295,13 +294,16 @@ int main(int argc, char** argv)
             0, size * sizeof(float), result,
             0, NULL, NULL);
 
+        auto stop = high_resolution_clock::now();
+        auto duration = duration_cast<microseconds>(stop - start);
         // Output the result buffer
         for (int i = 0; i < size; i++)
         {
             std::cout << result[i] << " ";
         }
         std::cout << std::endl;
-        std::cout << "Executed program succesfully." << std::endl;
+        std::cout << "Time taken by " << kernelType[i] << ":"
+            << (float)duration.count() / 1000000 << " seconds" << std::endl;
         Cleanup(context, commandQueue, program, kernel, memObjects);
 
     }
