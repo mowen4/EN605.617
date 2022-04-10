@@ -13,6 +13,8 @@
 //    This is a simple example that demonstrates basic OpenCL setup and
 //    use.
 
+#include <stdio.h>
+#include <stdlib.h>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -24,7 +26,7 @@
 #include <CL/cl.h>
 #endif
 
-using namespace std::chrono
+using namespace std::chrono;
 
 ///
 //  Constants
