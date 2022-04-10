@@ -238,7 +238,8 @@ int main(int argc, char** argv)
         size = getCmdLineArgumentInt(argc, (const char**)argv, "size");
     }
     
-    
+    const char *kernelType[5] = {"add.cl", "sub.cl", "div.cl", "mul.cl", "pow.cl"}
+
     cl_context context = 0;
     cl_command_queue commandQueue = 0;
     cl_program program = 0;
@@ -247,102 +248,93 @@ int main(int argc, char** argv)
     cl_mem memObjects[3] = { 0, 0, 0 };
     cl_int errNum;
 
+
+
     // Create an OpenCL context on first available platform
     context = CreateContext();
-    if (context == NULL)
-    {
-        std::cerr << "Failed to create OpenCL context." << std::endl;
-        return 1;
-    }
 
     // Create a command-queue on the first device available
     // on the created context
     commandQueue = CreateCommandQueue(context, &device);
-    if (commandQueue == NULL)
-    {
-        Cleanup(context, commandQueue, program, kernel, memObjects);
-        return 1;
-    }
 
     // Create OpenCL program from HelloWorld.cl kernel source
-    program = CreateProgram(context, device, "div.cl");
-    if (program == NULL)
-    {
+    program = CreateProgram(context, device, "HelloWorld.cl");
+
+    for (int i = 0; i < 5; i++) {
+
+        // Create OpenCL kernel
+        kernel = clCreateKernel(program, kernelType[i], NULL);
+        if (kernel == NULL)
+        {
+            std::cerr << "Failed to create kernel" << std::endl;
+            Cleanup(context, commandQueue, program, kernel, memObjects);
+            return 1;
+        }
+
+        // Create memory objects that will be used as arguments to
+        // kernel.  First create host memory arrays that will be
+        // used to store the arguments to the kernel
+        float result[size];
+        float a[size];
+        float b[size];
+        for (int i = 0; i < size; i++)
+        {
+            a[i] = (float)i;
+            b[i] = (float)(i * 2);
+        }
+
+        if (!CreateMemObjects(context, memObjects, a, b, size))
+        {
+            Cleanup(context, commandQueue, program, kernel, memObjects);
+            return 1;
+        }
+
+        // Set the kernel arguments (result, a, b)
+        errNum = clSetKernelArg(kernel, 0, sizeof(cl_mem), &memObjects[0]);
+        errNum |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &memObjects[1]);
+        errNum |= clSetKernelArg(kernel, 2, sizeof(cl_mem), &memObjects[2]);
+        if (errNum != CL_SUCCESS)
+        {
+            std::cerr << "Error setting kernel arguments." << std::endl;
+            Cleanup(context, commandQueue, program, kernel, memObjects);
+            return 1;
+        }
+
+        size_t globalWorkSize[1] = { size };
+        size_t localWorkSize[1] = { 1 };
+
+        // Queue the kernel up for execution across the array
+        errNum = clEnqueueNDRangeKernel(commandQueue, kernel, 1, NULL,
+            globalWorkSize, localWorkSize,
+            0, NULL, NULL);
+        if (errNum != CL_SUCCESS)
+        {
+            std::cerr << "Error queuing kernel for execution." << std::endl;
+            Cleanup(context, commandQueue, program, kernel, memObjects);
+            return 1;
+        }
+
+        // Read the output buffer back to the Host
+        errNum = clEnqueueReadBuffer(commandQueue, memObjects[2], CL_TRUE,
+            0, size * sizeof(float), result,
+            0, NULL, NULL);
+        if (errNum != CL_SUCCESS)
+        {
+            std::cerr << "Error reading result buffer." << std::endl;
+            Cleanup(context, commandQueue, program, kernel, memObjects);
+            return 1;
+        }
+
+        // Output the result buffer
+        for (int i = 0; i < size; i++)
+        {
+            std::cout << result[i] << " ";
+        }
+        std::cout << std::endl;
+        std::cout << "Executed program succesfully." << std::endl;
         Cleanup(context, commandQueue, program, kernel, memObjects);
-        return 1;
-    }
 
-    // Create OpenCL kernel
-    kernel = clCreateKernel(program, "div_kernel", NULL);
-    if (kernel == NULL)
-    {
-        std::cerr << "Failed to create kernel" << std::endl;
-        Cleanup(context, commandQueue, program, kernel, memObjects);
-        return 1;
     }
-
-    // Create memory objects that will be used as arguments to
-    // kernel.  First create host memory arrays that will be
-    // used to store the arguments to the kernel
-    float result[size];
-    float a[size];
-    float b[size];
-    for (int i = 0; i < size; i++)
-    {
-        a[i] = (float)i;
-        b[i] = (float)(i * 2);
-    }
-
-    if (!CreateMemObjects(context, memObjects, a, b, size))
-    {
-        Cleanup(context, commandQueue, program, kernel, memObjects);
-        return 1;
-    }
-
-    // Set the kernel arguments (result, a, b)
-    errNum = clSetKernelArg(kernel, 0, sizeof(cl_mem), &memObjects[0]);
-    errNum |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &memObjects[1]);
-    errNum |= clSetKernelArg(kernel, 2, sizeof(cl_mem), &memObjects[2]);
-    if (errNum != CL_SUCCESS)
-    {
-        std::cerr << "Error setting kernel arguments." << std::endl;
-        Cleanup(context, commandQueue, program, kernel, memObjects);
-        return 1;
-    }
-
-    size_t globalWorkSize[1] = { size };
-    size_t localWorkSize[1] = { 1 };
-
-    // Queue the kernel up for execution across the array
-    errNum = clEnqueueNDRangeKernel(commandQueue, kernel, 1, NULL,
-                                    globalWorkSize, localWorkSize,
-                                    0, NULL, NULL);
-    if (errNum != CL_SUCCESS)
-    {
-        std::cerr << "Error queuing kernel for execution." << std::endl;
-        Cleanup(context, commandQueue, program, kernel, memObjects);
-        return 1;
-    }
-
-    // Read the output buffer back to the Host
-    errNum = clEnqueueReadBuffer(commandQueue, memObjects[2], CL_TRUE,
-                                 0, size * sizeof(float), result,
-                                 0, NULL, NULL);
-    if (errNum != CL_SUCCESS)
-    {
-        std::cerr << "Error reading result buffer." << std::endl;
-        Cleanup(context, commandQueue, program, kernel, memObjects);
-        return 1;
-    }
-
-    // Output the result buffer
-    for (int i = 0; i < size; i++)
-    {
-        std::cout << result[i] << " ";
-    }
-    std::cout << std::endl;
-    std::cout << "Executed program succesfully." << std::endl;
-    Cleanup(context, commandQueue, program, kernel, memObjects);
 
     return 0;
 }
