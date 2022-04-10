@@ -229,11 +229,10 @@ void Cleanup(cl_context context, cl_command_queue commandQueue,
 //
 int main(int argc, char** argv)
 {
+    int size = 10;
+
     if (checkCmdLineFlag(argc, (const char**)argv, "size")) {
         size = getCmdLineArgumentInt(argc, (const char**)argv, "size");
-    }
-    else {
-        size = 10;
     }
     
     
