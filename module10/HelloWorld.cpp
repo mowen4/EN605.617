@@ -295,7 +295,7 @@ int runKernels(int size) {
             std::cout << result[i] << " ";
         }
         std::cout << std::endl;
-        std::cout << "Time taken by " << kernelType[i] << ":"
+        std::cout << "Time taken by " << kernelType[i] << ": "
             << (float)duration.count() / 1000000 << " seconds" << std::endl;
         Cleanup(context, commandQueue, program, kernel, memObjects);
 
