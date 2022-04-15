@@ -328,7 +328,7 @@ void runSignalOne()
 	maskBuffer = clCreateBuffer(
 		context,
 		CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-		sizeof(cl_uint) * maskHeight * maskWidth,
+		sizeof(cl_float) * maskHeight * maskWidth,
 		static_cast<void *>(mask),
 		&errNum);
 	checkErr(errNum, "clCreateBuffer(mask)");
