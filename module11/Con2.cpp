@@ -183,7 +183,7 @@ void CL_CALLBACK contextCallback(
 	exit(1);
 }
 
-void runSignalOne():
+void runSignalOne()
 {
 	// 1st test hardess harcoded
 	cl_int errNum;
