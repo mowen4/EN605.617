@@ -248,6 +248,7 @@ int main(int argc, char** argv)
 		CL_BUFFER_CREATE_TYPE_REGION,
 		&region,
 		&errNum);
+		
 	checkErr(errNum, "clCreateSubBuffer");
 
 	buffers.push_back(buffer);
@@ -255,7 +256,7 @@ int main(int argc, char** argv)
 	int ptr[16] = {10,10,10,10,0,1,2,3,4,5,6,7,8,9,10,10};
 	size_t buffer_origin[3] = {0*sizeof(int),0,0};
 	size_t host_origin[3] = {0,0,0};
-	size_t region[3] = {4*sizeof(int), 4, 1};	
+	size_t region[3] = {2*sizeof(int), 2, 1};	
 	
 	errNum = clEnqueueWriteBufferRect(
 		queues[numDevices - 1],
