@@ -257,7 +257,7 @@ int main(int argc, char** argv)
 		NULL,
 		NULL);
 	
-	std::cout << ptr[0] << std::endl;
+	std::cout << main_buffer[0] << std::endl;
 
     std::vector<cl_event> events;
     // call kernel for each device
