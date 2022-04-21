@@ -181,7 +181,7 @@ int main(int argc, char** argv)
         cl_buffer_region region = 
             {
                 NUM_BUFFER_ELEMENTS / 4 * i * sizeof(int), 
-                sizeof(int)
+                NUM_BUFFER_ELEMENTS / 4 * sizeof(int)
             };
         cl_mem buffer = clCreateSubBuffer(
             main_buffer,
@@ -266,7 +266,7 @@ int main(int argc, char** argv)
     {
         cl_event event;
 
-        size_t gWI = NUM_BUFFER_ELEMENTS;
+        size_t gWI = 4;
 
         errNum = clEnqueueNDRangeKernel(
             queues[i], 
