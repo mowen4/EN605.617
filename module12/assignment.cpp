@@ -198,14 +198,14 @@ int main(int argc, char** argv)
     for (unsigned int i = 0; i < 4; i++)
     {
         InfoDevice<cl_device_type>::display(
-            deviceIDs[i], 
+            deviceIDs[0], 
             CL_DEVICE_TYPE, 
             "CL_DEVICE_TYPE");
 
         cl_command_queue queue = 
             clCreateCommandQueue(
                 context,
-                deviceIDs[i],
+                deviceIDs[0],
                 0,
                 &errNum);
         checkErr(errNum, "clCreateCommandQueue");
