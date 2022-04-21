@@ -229,12 +229,14 @@ int main(int argc, char** argv)
 	
 	
 	//added
-	size_t buffer_origin[3] = (1*sizeof(int), 1, 0);
-	size_t host_origin[3] = (0, 0, 0);
-	size_t region[3] = (2*sizeof(int),2,1);
+	int ptr[4] = {-1,-1,-1,-1};
+	size_t buffer_origin[3] = {1*sizeof(int), 1, 0};
+	size_t host_origin[3] = {0, 0, 0};
+	size_t region[3] = {2*sizeof(int),2,1};
 
 	//changed
 	// Write input data
+	
 	errNum = clEnqueueWriteBufferRec(
 		queues[numDevices - 1],
 		main_buffer,
