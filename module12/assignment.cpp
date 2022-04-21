@@ -176,12 +176,12 @@ int main(int argc, char** argv)
     checkErr(errNum, "clCreateBuffer");
 
     // now for all devices other than the first create a sub-buffer
-    for (unsigned int i = 0; i < numDevices; i++)
+    for (unsigned int i = 0; i < 4; i++)
     {
         cl_buffer_region region = 
             {
-                NUM_BUFFER_ELEMENTS * i * sizeof(int), 
-                NUM_BUFFER_ELEMENTS * sizeof(int)
+                NUM_BUFFER_ELEMENTS / 4 * i * sizeof(int), 
+                NUM_BUFFER_ELEMENTS / 4 * sizeof(int)
             };
         cl_mem buffer = clCreateSubBuffer(
             main_buffer,
