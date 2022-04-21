@@ -176,7 +176,7 @@ int main(int argc, char** argv)
     checkErr(errNum, "clCreateBuffer");
 
     // now for all devices other than the first create a sub-buffer
-    for (unsigned int i = 0; i < numDevices; i++)
+    for (unsigned int i = 0; i < 4; i++)
     {
         cl_buffer_region region = 
             {
@@ -235,6 +235,28 @@ int main(int argc, char** argv)
 		0,
 		NULL,
 		NULL);
+		
+	int ptr[4] = {10,10,10,10};
+	size_t buffer_origin[3] = {1*sizeof(int),1,1};
+	size_t host_origin[3] = {0,0,0};
+	size_t region[3] = {2*sizeof(int), 2, 1};
+	
+	errNum = clEnqueueWriteBufferRect(
+		queues[numDevices - 1],
+		main_buffer,
+		CL_TRUE,
+		buffer_origin,
+		host_origin,
+		region,
+		(NUM_BUFFER_ELEMENTS / 4) * sizeof(int),
+		0,
+		0,
+		2 sizeof(int),
+		(void*)ptr,
+		0,
+		NULL,
+		NULL);
+	
 
     std::vector<cl_event> events;
     // call kernel for each device
