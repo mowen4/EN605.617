@@ -236,12 +236,12 @@ int main(int argc, char** argv)
 		NULL,
 		NULL);
 		
-	int ptr[4] = {10,10,10,10,0,1,2,3,4,5,6,7,8,9,10,10};
+	int ptr[16] = {10,10,10,10,0,1,2,3,4,5,6,7,8,9,10,10};
 	size_t buffer_origin[3] = {1*sizeof(int),1,1};
 	size_t host_origin[3] = {0,0,0};
 	size_t region[3] = {2*sizeof(int), 2, 1};	
 	
-		errNum = clEnqueueWriteBuffer(
+	errNum = clEnqueueWriteBuffer(
 		queues[numDevices - 1],
 		main_buffer,
 		CL_TRUE,
