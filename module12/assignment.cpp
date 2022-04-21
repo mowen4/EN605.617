@@ -250,7 +250,7 @@ int main(int argc, char** argv)
 	
 	errNum = clEnqueueReadBufferRect(
 		queues[numDevices - 1],
-		main_buffer,
+		buffer,
 		CL_TRUE,
 		buffer_origin,
 		host_origin,
