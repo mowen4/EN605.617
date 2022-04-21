@@ -163,7 +163,7 @@ int main(int argc, char** argv)
     inputOutput = new int[NUM_BUFFER_ELEMENTS * numDevices];
     for (unsigned int i = 0; i < NUM_BUFFER_ELEMENTS * numDevices; i++)
     {
-        inputOutput[i] = i;
+        inputOutput[i] = i * i;
     }
 
     // create a single buffer to cover all the input data
@@ -219,6 +219,7 @@ int main(int argc, char** argv)
         checkErr(errNum, "clCreateKernel(square)");
 
         errNum = clSetKernelArg(kernel, 0, sizeof(cl_mem) , (void *)&buffers[i]);
+		
         checkErr(errNum, "clSetKernelArg(square)");
 
         kernels.push_back(kernel);
