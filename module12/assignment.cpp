@@ -235,7 +235,7 @@ int main(int argc, char** argv)
 		0,
 		NULL,
 		NULL);
-		
+	/*	
 	int ptr[16] = {10,10,10,10,0,1,2,3,4,5,6,7,8,9,10,10};
 	size_t buffer_origin[3] = {0*sizeof(int),0,0};
 	size_t host_origin[3] = {0,0,0};
@@ -258,7 +258,8 @@ int main(int argc, char** argv)
 		NULL);
 	
 	std::cout << ptr[0] << std::endl;
-
+	*/
+	
     std::vector<cl_event> events;
     // call kernel for each device
     for (unsigned int i = 0; i < queues.size(); i++)
