@@ -237,7 +237,7 @@ int main(int argc, char** argv)
 	//changed
 	// Write input data
 	
-	errNum = clEnqueueWriteBufferRec(
+	errNum = clEnqueueWriteBufferRect(
 		queues[numDevices - 1],
 		main_buffer,
 		CL_TRUE,
