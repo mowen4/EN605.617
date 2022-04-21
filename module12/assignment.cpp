@@ -178,6 +178,9 @@ int main(int argc, char** argv)
     // now for all devices other than the first create a sub-buffer
     for (unsigned int i = 0; i < numDevices; i++)
     {
+	
+		std::cout << "Buffer Triggered" << std::endl;
+	
         cl_buffer_region region = 
             {
                 NUM_BUFFER_ELEMENTS * i * sizeof(int), 
