@@ -218,7 +218,7 @@ int main(int argc, char** argv)
             &errNum);
         checkErr(errNum, "clCreateKernel(square)");
 
-        errNum = clSetKernelArg(kernel, 0, sizeof(cl_mem) , (void *)&buffers[i]);
+        errNum = clSetKernelArg(kernel, 0, 4 * sizeof(int) , (void *)&buffers[i]);
         checkErr(errNum, "clSetKernelArg(square)");
 
         kernels.push_back(kernel);
