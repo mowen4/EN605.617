@@ -181,7 +181,7 @@ int main(int argc, char** argv)
         cl_buffer_region region = 
             {
                 NUM_BUFFER_ELEMENTS / 4 * i * sizeof(int), 
-                4 * sizeof(int)
+                NUM_BUFFER_ELEMENTS / 4 * sizeof(int)
             };
         cl_mem buffer = clCreateSubBuffer(
             main_buffer,
@@ -218,7 +218,7 @@ int main(int argc, char** argv)
             &errNum);
         checkErr(errNum, "clCreateKernel(square)");
 
-        errNum = clSetKernelArg(kernel, 0, 4 * sizeof(int) , (void *)&buffers[i]);
+        errNum = clSetKernelArg(kernel, 0, sizeof(cl_mem) , (void *)&buffers[i]);
         checkErr(errNum, "clSetKernelArg(square)");
 
         kernels.push_back(kernel);
