@@ -178,13 +178,10 @@ int main(int argc, char** argv)
     // now for all devices other than the first create a sub-buffer
     for (unsigned int i = 0; i < numDevices; i++)
     {
-	
-		std::cout << "Buffer Triggered" << std::endl;
-	
         cl_buffer_region region = 
             {
-                NUM_BUFFER_ELEMENTS * 2, 
-                NUM_BUFFER_ELEMENTS * 2
+                NUM_BUFFER_ELEMENTS * i * sizeof(int), 
+                NUM_BUFFER_ELEMENTS * sizeof(int)
             };
         cl_mem buffer = clCreateSubBuffer(
             main_buffer,
@@ -226,17 +223,8 @@ int main(int argc, char** argv)
 
         kernels.push_back(kernel);
     }
-	
-	
-	//added
-	int ptr[4] = {-1,-1,-1,-1};
-	size_t buffer_origin[3] = {1*sizeof(int), 1, 0};
-	size_t host_origin[3] = {0, 0, 0};
-	size_t region[3] = {2*sizeof(int),2,1};
 
-	//changed
 	// Write input data
-	
 	errNum = clEnqueueWriteBuffer(
 		queues[numDevices - 1],
 		main_buffer,
@@ -247,27 +235,6 @@ int main(int argc, char** argv)
 		0,
 		NULL,
 		NULL);
-	
-	errNum = clEnqueueWriteBufferRect(
-		queues[numDevices - 1],
-		main_buffer,
-		CL_TRUE,
-		buffer_origin,
-		host_origin,
-		region,
-		(NUM_BUFFER_ELEMENTS / 4) * sizeof(int),
-		0,
-		0,
-		2*sizeof(int),
-		static_cast<void*>(ptr),
-		0,
-		NULL,
-		NULL);
-
-	std::cout << " " << ptr[0];
-	std::cout << " " << ptr[1] << std::endl;
-	std::cout << " " << ptr[2];
-	std::cout << " " << ptr[3] << std::endl;
 
     std::vector<cl_event> events;
     // call kernel for each device
@@ -294,7 +261,7 @@ int main(int argc, char** argv)
     // Technically don't need this as we are doing a blocking read
     // with in-order queue.
     clWaitForEvents(events.size(), &events[0]);
-	
+
 	// Read back computed data
 	clEnqueueReadBuffer(
 		queues[numDevices - 1],
