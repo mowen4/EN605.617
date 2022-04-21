@@ -181,7 +181,7 @@ int main(int argc, char** argv)
         cl_buffer_region region = 
             {
                 NUM_BUFFER_ELEMENTS / 4 * i * sizeof(int), 
-                NUM_BUFFER_ELEMENTS / 4 * sizeof(int)
+                sizeof(int)
             };
         cl_mem buffer = clCreateSubBuffer(
             main_buffer,
