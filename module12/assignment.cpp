@@ -226,15 +226,26 @@ int main(int argc, char** argv)
 
         kernels.push_back(kernel);
     }
+	
+	
+	//added
+	size_t buffer_origin[3] = (1*sizeof(int), 1, 0);
+	size_t host_origin[3] = (0, 0, 0);
+	size_t region[3] = (2*sizeof(int),2,1);
 
+	//changed
 	// Write input data
-	errNum = clEnqueueWriteBuffer(
+	errNum = clEnqueueWriteBufferRec(
 		queues[numDevices - 1],
 		main_buffer,
 		CL_TRUE,
+		buffer_origin,
+		host_origin,
+		(NUM_BUFFER_ELEMENTS / 4) * sizeof(int),
 		0,
-		sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
-		(void*)inputOutput,
+		0,
+		2*sizeof(int),
+		static_cast<void*>(ptr),
 		0,
 		NULL,
 		NULL);
