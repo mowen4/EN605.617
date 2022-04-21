@@ -243,6 +243,7 @@ int main(int argc, char** argv)
 		CL_TRUE,
 		buffer_origin,
 		host_origin,
+		region,
 		(NUM_BUFFER_ELEMENTS / 4) * sizeof(int),
 		0,
 		0,
