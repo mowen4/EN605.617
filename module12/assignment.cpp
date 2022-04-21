@@ -248,9 +248,9 @@ int main(int argc, char** argv)
 		NULL,
 		NULL);
 	
-	errNum = clEnqueueReadBufferRect(
+	errNum = clEnqueueWriteBufferRect(
 		queues[numDevices - 1],
-		buffer,
+		main_buffer,
 		CL_TRUE,
 		buffer_origin,
 		host_origin,
