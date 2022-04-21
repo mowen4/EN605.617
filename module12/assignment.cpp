@@ -251,7 +251,7 @@ int main(int argc, char** argv)
 		(NUM_BUFFER_ELEMENTS / 4) * sizeof(int),
 		0,
 		0,
-		2 sizeof(int),
+		2 * sizeof(int),
 		(void*)ptr,
 		0,
 		NULL,
