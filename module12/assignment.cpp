@@ -248,7 +248,7 @@ int main(int argc, char** argv)
 		0,
 		0,
 		2*sizeof(int),
-		static_cast<void*>(ptr),
+		static_cast<void*>(buffer),
 		0,
 		NULL,
 		NULL);
