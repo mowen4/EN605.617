@@ -237,6 +237,17 @@ int main(int argc, char** argv)
 	//changed
 	// Write input data
 	
+	errNum = clEnqueueWriteBuffer(
+		queues[numDevices - 1],
+		main_buffer,
+		CL_TRUE,
+		0,
+		sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
+		(void*)inputOutput,
+		0,
+		NULL,
+		NULL);
+	
 	errNum = clEnqueueReadBufferRect(
 		queues[numDevices - 1],
 		main_buffer,
@@ -248,10 +259,15 @@ int main(int argc, char** argv)
 		0,
 		0,
 		2*sizeof(int),
-		static_cast<void*>(buffer),
+		static_cast<void*>(ptr),
 		0,
 		NULL,
 		NULL);
+
+	std::cout << " " << ptr[0];
+	std::cout << " " << ptr[1] << std::endl;
+	std::cout << " " << ptr[2];
+	std::cout << " " << ptr[3] << std::endl;
 
     std::vector<cl_event> events;
     // call kernel for each device
