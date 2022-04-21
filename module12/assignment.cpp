@@ -195,7 +195,7 @@ int main(int argc, char** argv)
     }
 
     // Create command queues
-    for (unsigned int i = 0; i < numDevices; i++)
+    for (unsigned int i = 0; i < 4; i++)
     {
         InfoDevice<cl_device_type>::display(
             deviceIDs[i], 
