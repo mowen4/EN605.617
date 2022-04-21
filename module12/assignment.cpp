@@ -241,7 +241,7 @@ int main(int argc, char** argv)
 	size_t host_origin[3] = {0,0,0};
 	size_t region[3] = {2*sizeof(int), 2, 1};	
 	
-	errNum = clEnqueueReadBufferRect(
+	errNum = clEnqueueWriteBufferRect(
 		queues[numDevices - 1],
 		main_buffer,
 		CL_TRUE,
@@ -257,7 +257,7 @@ int main(int argc, char** argv)
 		NULL,
 		NULL);
 	
-	std::cout << main_buffer[0] << std::endl;
+	std::cout << ptr[0] << std::endl;
 
     std::vector<cl_event> events;
     // call kernel for each device
