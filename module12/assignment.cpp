@@ -180,8 +180,8 @@ int main(int argc, char** argv)
     {
         cl_buffer_region region = 
             {
-                NUM_BUFFER_ELEMENTS / 4 * i * sizeof(int), 
-                NUM_BUFFER_ELEMENTS / 4 * sizeof(int)
+                4 * i * sizeof(int), 
+                4 * sizeof(int)
             };
         cl_mem buffer = clCreateSubBuffer(
             main_buffer,
@@ -276,7 +276,7 @@ int main(int argc, char** argv)
             NULL,
             (const size_t*)&gWI, 
             (const size_t*)NULL, 
-            0, 
+            NULL, 
             0, 
             &event);
 
@@ -300,19 +300,23 @@ int main(int argc, char** argv)
 		NULL);
 
     // Display output in rows
+	int av = 0;
+	
     for (unsigned i = 0; i < numDevices; i++)
     {
         for (unsigned elems = i * NUM_BUFFER_ELEMENTS; elems < ((i+1) * NUM_BUFFER_ELEMENTS); elems++)
         {
-            std::cout << " " << inputOutput[elems];
+			int temp = inputOutput[elems];
+			av += temp;
+            std::cout << " " << temp;
         }
-
         std::cout << std::endl;
+		std::cout << "Average is: " << av << std::endl;
+
     }
 
     std::cout << "Program completed successfully" << std::endl;
 	
-	std::cout << "Average is: " << inputOutput[0] << std::endl;
 	
 
     return 0;
