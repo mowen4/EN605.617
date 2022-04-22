@@ -12,10 +12,11 @@
 //
 //    This is a simple example demonstrating buffers and sub-buffer usage
 
-__kernel void square(__global * buffer)
+__kernel void square(__global * buffer, __global * results)
 {
 	size_t id = get_global_id(0);
+	size_t rid = get_global_id(1)
 	
-	buffer[id] = buffer[id] * buffer[id];
+	results[rid] = buffer[id] * buffer[id];
 	
 }
