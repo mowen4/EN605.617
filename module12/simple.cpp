@@ -300,11 +300,14 @@ int main(int argc, char** argv)
 		NULL);
 
     // Display output in rows
+	int av = 0;
+	
     for (unsigned i = 0; i < numDevices; i++)
     {
         for (unsigned elems = i * NUM_BUFFER_ELEMENTS; elems < ((i+1) * NUM_BUFFER_ELEMENTS); elems++)
         {
             std::cout << " " << inputOutput[elems];
+			av += inputOutput[elems];
         }
 
         std::cout << std::endl;
@@ -312,7 +315,7 @@ int main(int argc, char** argv)
 
     std::cout << "Program completed successfully" << std::endl;
 	
-	std::cout << "Average is: " << inputOutput[0] << std::endl;
+	std::cout << "Average is: " << av << std::endl;
 	
 
     return 0;
