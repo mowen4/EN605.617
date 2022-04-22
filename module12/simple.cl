@@ -22,7 +22,7 @@ __kernel void square(__global * buffer)
 	
 	for (int i = 0; i < 16; i++) {
 	
-		sum += buffer[i];
+		sum += buffer[id + i];
 	}
 	
 	buffer[id] = sum;
