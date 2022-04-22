@@ -311,6 +311,9 @@ int main(int argc, char** argv)
     }
 
     std::cout << "Program completed successfully" << std::endl;
+	
+	std::cout << "Average is: " << inputOutput[0] << std::endl;
+	
 
     return 0;
 }
