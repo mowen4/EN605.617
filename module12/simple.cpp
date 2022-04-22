@@ -309,13 +309,13 @@ int main(int argc, char** argv)
             std::cout << " " << inputOutput[elems];
 			av += inputOutput[elems];
         }
-
         std::cout << std::endl;
+		std::cout << "Average is: " << av << std::endl;
+
     }
 
     std::cout << "Program completed successfully" << std::endl;
 	
-	std::cout << "Average is: " << av << std::endl;
 	
 
     return 0;
