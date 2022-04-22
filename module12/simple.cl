@@ -18,5 +18,5 @@ __kernel void square(__global * buffer)
 	
 	buffer[id] =  buffer[id] / 16;
 	
-	buffer[0] += buffer[id];
+	buffer[id] += buffer[id];
 }
