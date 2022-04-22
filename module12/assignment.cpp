@@ -267,7 +267,7 @@ int main(int argc, char** argv)
     {
         cl_event event;
 
-        size_t gWI = 16;
+        size_t gWI = 4;
 
         errNum = clEnqueueNDRangeKernel(
             queues[i], 
