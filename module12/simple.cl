@@ -299,7 +299,7 @@ int main(int argc, char** argv)
 	// Read back computed data
 	clEnqueueReadBuffer(
 		queues[numDevices - 1],
-		out_buffer,
+		main_buffer,
 		CL_TRUE,
 		0,
 		sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
