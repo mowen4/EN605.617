@@ -12,7 +12,7 @@
 //
 //    This is a simple example demonstrating buffers and sub-buffer usage
 
-__kernel void square(__local * buffer)
+__kernel void square(__global * buffer)
 {
 	size_t id = get_global_id(0);
 	if (id < 4)
