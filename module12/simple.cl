@@ -15,9 +15,7 @@
 __kernel void square(__global * buffer)
 {
 	size_t id = get_global_id(0);
-	int sum = 0;
 	
-	sum = (buffer[id] + sum) / 4;
+	buffer[0] = (buffer[0] + buffer[id])/2
 	
-	buffer[id] = sum;
 }
