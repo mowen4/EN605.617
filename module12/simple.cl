@@ -15,11 +15,6 @@
 __kernel void square(__global * buffer)
 {
 	size_t id = get_global_id(0);
-	int sum = 0;
 	
-	sum += buffer[id] / 16;
-	
-	barrier(CLK_LOCAL_MEM_FENCE);
-	
-	buffer[0] = sum;
+	buffer[id] =  buffer[id] / 16;
 }
