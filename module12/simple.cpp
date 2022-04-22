@@ -306,8 +306,9 @@ int main(int argc, char** argv)
     {
         for (unsigned elems = i * NUM_BUFFER_ELEMENTS; elems < ((i+1) * NUM_BUFFER_ELEMENTS); elems++)
         {
-            std::cout << " " << inputOutput[elems];
-			av += inputOutput[elems];
+			int temp = inputOutput[elems];
+			av += temp;
+            std::cout << " " << temp;
         }
         std::cout << std::endl;
 		std::cout << "Average is: " << av << std::endl;
