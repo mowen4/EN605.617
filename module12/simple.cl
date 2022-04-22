@@ -17,6 +17,6 @@ __kernel void square(__global * buffer, __global * results)
 	size_t id = get_global_id(0);
 	size_t rid = get_global_id(1);
 	
-	results[rid] = buffer[id] * buffer[id];
+	results[rid] = buffer[id] / 16;
 	
 }
