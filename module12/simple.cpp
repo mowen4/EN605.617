@@ -174,6 +174,14 @@ int main(int argc, char** argv)
         NULL,
         &errNum);
     checkErr(errNum, "clCreateBuffer");
+	
+	cl_mem out_buffer = clCreateBuffer(
+        context,
+        CL_MEM_READ_WRITE,
+        sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
+        NULL,
+        &errNum);
+    checkErr(errNum, "clCreateBuffer");
 
     // now for all devices other than the first create a sub-buffer
     for (unsigned int i = 0; i < 4; i++)
@@ -219,6 +227,7 @@ int main(int argc, char** argv)
         checkErr(errNum, "clCreateKernel(square)");
 
         errNum = clSetKernelArg(kernel, 0, sizeof(cl_mem) , (void *)&buffers[i]);
+		errNum = clSetKernelArg(kernel, 1, sizeof(cl_mem) , (void *)&out_buffer);
 		
         checkErr(errNum, "clSetKernelArg(square)");
 
@@ -294,7 +303,7 @@ int main(int argc, char** argv)
 		CL_TRUE,
 		0,
 		sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
-		(void*)inputOutput,
+		(void*)out_buffer,
 		0,
 		NULL,
 		NULL);
