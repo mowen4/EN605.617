@@ -15,7 +15,7 @@
 __kernel void square(__global * buffer)
 {
 	size_t id = get_local_id(0);
-	print(id);
+	printf(id);
 	
 	if (id < 4)
 		buffer[id] = (buffer[id] * buffer[id]);	
