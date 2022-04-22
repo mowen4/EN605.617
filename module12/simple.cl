@@ -18,5 +18,12 @@ __kernel void square(__global * buffer)
 	
 	buffer[id] =  buffer[id] / 16;
 	
-	buffer[id] += buffer[id];
+	int sum = 0;
+	
+	for (int i = 0; i < 16; i++) {
+	
+		sum += buffer[i];
+	}
+	
+	buffer[id] = sum;
 }
