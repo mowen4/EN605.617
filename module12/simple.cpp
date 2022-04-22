@@ -56,29 +56,6 @@ int main(int argc, char** argv)
     int platform = DEFAULT_PLATFORM; 
     bool useMap  = DEFAULT_USE_MAP;
 
-    std::cout << "Simple buffer and sub-buffer Example" << std::endl;
-
-    for (int i = 1; i < argc; i++)
-    {
-        std::string input(argv[i]);
-
-        if (!input.compare("--platform"))
-        {
-            input = std::string(argv[++i]);
-            std::istringstream buffer(input);
-            buffer >> platform;
-        }
-        else if (!input.compare("--useMap"))
-        {
-            useMap = true;
-        }
-        else
-        {
-            std::cout << "usage: --platform n --useMap" << std::endl;
-            return 0;
-        }
-    }
-
 
     // First, select an OpenCL platform to run on.  
     errNum = clGetPlatformIDs(0, NULL, &numPlatforms);
@@ -186,7 +163,7 @@ int main(int argc, char** argv)
     inputOutput = new int[NUM_BUFFER_ELEMENTS * numDevices];
     for (unsigned int i = 0; i < NUM_BUFFER_ELEMENTS * numDevices; i++)
     {
-        inputOutput[i] = i;
+        inputOutput[i] = i * i;
     }
 
     // create a single buffer to cover all the input data
@@ -199,12 +176,12 @@ int main(int argc, char** argv)
     checkErr(errNum, "clCreateBuffer");
 
     // now for all devices other than the first create a sub-buffer
-    for (unsigned int i = 0; i < numDevices; i++)
+    for (unsigned int i = 0; i < 4; i++)
     {
         cl_buffer_region region = 
             {
-                NUM_BUFFER_ELEMENTS * i * sizeof(int), 
-                NUM_BUFFER_ELEMENTS * sizeof(int)
+                NUM_BUFFER_ELEMENTS / 4 * i * sizeof(int), 
+                NUM_BUFFER_ELEMENTS / 4 * sizeof(int)
             };
         cl_mem buffer = clCreateSubBuffer(
             main_buffer,
@@ -218,17 +195,17 @@ int main(int argc, char** argv)
     }
 
     // Create command queues
-    for (unsigned int i = 0; i < numDevices; i++)
+    for (unsigned int i = 0; i < 4; i++)
     {
         InfoDevice<cl_device_type>::display(
-            deviceIDs[i], 
+            deviceIDs[0], 
             CL_DEVICE_TYPE, 
             "CL_DEVICE_TYPE");
 
         cl_command_queue queue = 
             clCreateCommandQueue(
                 context,
-                deviceIDs[i],
+                deviceIDs[0],
                 0,
                 &errNum);
         checkErr(errNum, "clCreateCommandQueue");
@@ -241,63 +218,56 @@ int main(int argc, char** argv)
             &errNum);
         checkErr(errNum, "clCreateKernel(square)");
 
-        errNum = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&buffers[i]);
+        errNum = clSetKernelArg(kernel, 0, sizeof(cl_mem) , (void *)&buffers[i]);
+		
         checkErr(errNum, "clSetKernelArg(square)");
 
         kernels.push_back(kernel);
     }
 
-    if (useMap) 
-    {
-        cl_int * mapPtr = (cl_int*) clEnqueueMapBuffer(
-            queues[numDevices - 1],
-            main_buffer,
-            CL_TRUE,
-            CL_MAP_WRITE,
-            0,
-            sizeof(cl_int) * NUM_BUFFER_ELEMENTS * numDevices,
-            0,
-            NULL,
-            NULL,
-            &errNum);
-        checkErr(errNum, "clEnqueueMapBuffer(..)");
-
-        for (unsigned int i = 0; i < NUM_BUFFER_ELEMENTS * numDevices; i++)
-        {
-            mapPtr[i] = inputOutput[i];
-        }
-
-        errNum = clEnqueueUnmapMemObject(
-            queues[numDevices - 1],
-            main_buffer,
-            mapPtr,
-            0,
-            NULL,
-            NULL);
-        checkErr(errNum, "clEnqueueUnmapMemObject(..)");
-    }
-    else 
-    {
-        // Write input data
-        errNum = clEnqueueWriteBuffer(
-            queues[numDevices - 1],
-            main_buffer,
-            CL_TRUE,
-            0,
-            sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
-            (void*)inputOutput,
-            0,
-            NULL,
-            NULL);
-    }
-
+	// Write input data
+	errNum = clEnqueueWriteBuffer(
+		queues[numDevices - 1],
+		main_buffer,
+		CL_TRUE,
+		0,
+		sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
+		(void*)inputOutput,
+		0,
+		NULL,
+		NULL);
+	/*	
+	int ptr[16] = {10,10,10,10,0,1,2,3,4,5,6,7,8,9,10,10};
+	size_t buffer_origin[3] = {0*sizeof(int),0,0};
+	size_t host_origin[3] = {0,0,0};
+	size_t region[3] = {4*sizeof(int), 4, 1};	
+	
+	errNum = clEnqueueWriteBufferRect(
+		queues[numDevices - 1],
+		main_buffer,
+		CL_TRUE,
+		buffer_origin,
+		host_origin,
+		region,
+		(NUM_BUFFER_ELEMENTS / 4) * sizeof(int),
+		0,
+		0,
+		2 * sizeof(int),
+		(void*)ptr,
+		0,
+		NULL,
+		NULL);
+	
+	std::cout << ptr[0] << std::endl;
+	*/
+	
     std::vector<cl_event> events;
     // call kernel for each device
     for (unsigned int i = 0; i < queues.size(); i++)
     {
         cl_event event;
 
-        size_t gWI = NUM_BUFFER_ELEMENTS;
+        size_t gWI = 16;
 
         errNum = clEnqueueNDRangeKernel(
             queues[i], 
@@ -317,50 +287,17 @@ int main(int argc, char** argv)
     // with in-order queue.
     clWaitForEvents(events.size(), &events[0]);
 
-    if (useMap)
-    {
-        cl_int * mapPtr = (cl_int*) clEnqueueMapBuffer(
-            queues[numDevices - 1],
-            main_buffer,
-            CL_TRUE,
-            CL_MAP_READ,
-            0,
-            sizeof(cl_int) * NUM_BUFFER_ELEMENTS * numDevices,
-            0,
-            NULL,
-            NULL,
-            &errNum);
-        checkErr(errNum, "clEnqueueMapBuffer(..)");
-
-        for (unsigned int i = 0; i < NUM_BUFFER_ELEMENTS * numDevices; i++)
-        {
-            inputOutput[i] = mapPtr[i];
-        }
-
-        errNum = clEnqueueUnmapMemObject(
-            queues[numDevices - 1],
-            main_buffer,
-            mapPtr,
-            0,
-            NULL,
-            NULL);
-
-        clFinish(queues[numDevices - 1]);
-    }
-    else 
-    {
-        // Read back computed data
-        clEnqueueReadBuffer(
-            queues[numDevices - 1],
-            main_buffer,
-            CL_TRUE,
-            0,
-            sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
-            (void*)inputOutput,
-            0,
-            NULL,
-            NULL);
-    }
+	// Read back computed data
+	clEnqueueReadBuffer(
+		queues[numDevices - 1],
+		main_buffer,
+		CL_TRUE,
+		0,
+		sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
+		(void*)inputOutput,
+		0,
+		NULL,
+		NULL);
 
     // Display output in rows
     for (unsigned i = 0; i < numDevices; i++)
@@ -374,6 +311,9 @@ int main(int argc, char** argv)
     }
 
     std::cout << "Program completed successfully" << std::endl;
+	
+	std::cout << "Average is: " << inputOutput[0] << std::endl;
+	
 
     return 0;
 }
