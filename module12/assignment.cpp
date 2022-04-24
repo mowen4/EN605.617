@@ -165,7 +165,7 @@ int main(int argc, char** argv)
     inputOutput = new cl_float[NUM_BUFFER_ELEMENTS * numDevices];
     for (unsigned int i = 0; i < NUM_BUFFER_ELEMENTS * numDevices; i++)
     {
-        inputOutput[i] = i;
+        inputOutput[i] = i * i;
     }
 
     // create a single buffer to cover all the input data
@@ -199,10 +199,6 @@ int main(int argc, char** argv)
     // Create command queues
     for (unsigned int i = 0; i < 4; i++)
     {
-        InfoDevice<cl_device_type>::display(
-            deviceIDs[0], 
-            CL_DEVICE_TYPE, 
-            "CL_DEVICE_TYPE");
 
         cl_command_queue queue = 
             clCreateCommandQueue(
