@@ -53,7 +53,7 @@ int main(int argc, char** argv)
     std::vector<cl_kernel> kernels;
     std::vector<cl_command_queue> queues;
     std::vector<cl_mem> buffers;
-    int * inputOutput;
+    cl_float * inputOutput;
 
     int platform = DEFAULT_PLATFORM; 
     bool useMap  = DEFAULT_USE_MAP;
@@ -162,7 +162,7 @@ int main(int argc, char** argv)
     }
 
     // create buffers and sub-buffers
-    inputOutput = new int[NUM_BUFFER_ELEMENTS * numDevices];
+    inputOutput = new cl_float[NUM_BUFFER_ELEMENTS * numDevices];
     for (unsigned int i = 0; i < NUM_BUFFER_ELEMENTS * numDevices; i++)
     {
         inputOutput[i] = i * i;
@@ -172,7 +172,7 @@ int main(int argc, char** argv)
     cl_mem main_buffer = clCreateBuffer(
         context,
         CL_MEM_READ_WRITE,
-        sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
+        sizeof(cl_float) * NUM_BUFFER_ELEMENTS * numDevices,
         NULL,
         &errNum);
     checkErr(errNum, "clCreateBuffer");
@@ -182,8 +182,8 @@ int main(int argc, char** argv)
     {
         cl_buffer_region region = 
             {
-                4 * i * sizeof(int), 
-                4 * sizeof(int)
+                4 * i * sizeof(cl_float), 
+                4 * sizeof(cl_float)
             };
         cl_mem buffer = clCreateSubBuffer(
             main_buffer,
@@ -221,8 +221,8 @@ int main(int argc, char** argv)
         checkErr(errNum, "clCreateKernel(square)");
 		errNum = clSetKernelArg(kernel, 0, sizeof(cl_int) , (void *)&len);
         errNum = clSetKernelArg(kernel, 1, sizeof(cl_mem) , (void *)&buffers[i]);
-		errNum = clSetKernelArg(kernel, 2, 16 * sizeof(float), NULL);
-		errNum = clSetKernelArg(kernel, 3, 16 * sizeof(float), NULL);
+		errNum = clSetKernelArg(kernel, 2, 16 * sizeof(cl_float), NULL);
+		errNum = clSetKernelArg(kernel, 3, 16 * sizeof(cl_float), NULL);
         checkErr(errNum, "clSetKernelArg(square)");
 
         kernels.push_back(kernel);
@@ -234,35 +234,11 @@ int main(int argc, char** argv)
 		main_buffer,
 		CL_TRUE,
 		0,
-		sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
+		sizeof(cl_float) * NUM_BUFFER_ELEMENTS * numDevices,
 		(void*)inputOutput,
 		0,
 		NULL,
 		NULL);
-	/*	
-	int ptr[16] = {10,10,10,10,0,1,2,3,4,5,6,7,8,9,10,10};
-	size_t buffer_origin[3] = {0*sizeof(int),0,0};
-	size_t host_origin[3] = {0,0,0};
-	size_t region[3] = {4*sizeof(int), 4, 1};	
-	
-	errNum = clEnqueueWriteBufferRect(
-		queues[numDevices - 1],
-		main_buffer,
-		CL_TRUE,
-		buffer_origin,
-		host_origin,
-		region,
-		(NUM_BUFFER_ELEMENTS / 4) * sizeof(int),
-		0,
-		0,
-		2 * sizeof(int),
-		(void*)ptr,
-		0,
-		NULL,
-		NULL);
-	
-	std::cout << ptr[0] << std::endl;
-	*/
 	
     std::vector<cl_event> events;
     // call kernel for each device
@@ -296,27 +272,22 @@ int main(int argc, char** argv)
 		main_buffer,
 		CL_TRUE,
 		0,
-		sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
+		sizeof(cl_float) * NUM_BUFFER_ELEMENTS * numDevices,
 		(void*)inputOutput,
 		0,
 		NULL,
 		NULL);
 
     // Display output in rows
-	int av = 0;
-	
-    for (unsigned i = 0; i < numDevices; i++)
-    {
-        for (unsigned elems = i * NUM_BUFFER_ELEMENTS; elems < ((i+1) * NUM_BUFFER_ELEMENTS); elems++)
-        {
-			int temp = inputOutput[elems];
-			av += temp;
-            std::cout << " " << temp;
-        }
-        std::cout << std::endl;
-		std::cout << "Average is: " << av << std::endl;
 
-    }
+	for (unsigned elems = i * NUM_BUFFER_ELEMENTS; elems < ((i+1) * NUM_BUFFER_ELEMENTS); elems++)
+	{
+		int temp = inputOutput[elems];
+		av += temp;
+		std::cout << " " << temp;
+	}
+	std::cout << std::endl;
+	std::cout << "Average is: " << inputOutput[0] << std::endl;
 
     std::cout << "Program completed successfully" << std::endl;
 	
