@@ -19,6 +19,10 @@
 #include <string>
 #include <vector>
 
+#include <chrono>
+
+using namespace std::chrono;
+
 #include "info.hpp"
 
 #define DEFAULT_PLATFORM 0
@@ -282,9 +286,34 @@ int driver(int multiplier)
 //
 int main(int argc, char** argv)
 {
+	auto start = high_resolution_clock::now();
     driver(1);
+	
+	auto stop = high_resolution_clock::now();
+    auto duration = duration_cast<microseconds>(stop - start);
+	std::cout << std::endl;
+	std::cout << "Time taken: "
+		<< (float)duration.count() / 1000000 << " seconds" << std::endl;
+	
+	start = high_resolution_clock::now();
+	
 	driver(2);
+	
+	stop = high_resolution_clock::now();
+    duration = duration_cast<microseconds>(stop - start);
+	std::cout << std::endl;
+	std::cout << "Time taken: "
+		<< (float)duration.count() / 1000000 << " seconds" << std::endl;
+	
+	start = high_resolution_clock::now();
+	
 	driver(3);
+	
+	stop = high_resolution_clock::now();
+    duration = duration_cast<microseconds>(stop - start);
+	std::cout << std::endl;
+	std::cout << "Time taken: "
+		<< (float)duration.count() / 1000000 << " seconds" << std::endl;
 
     return 0;
 }
