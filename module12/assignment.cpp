@@ -14,13 +14,13 @@
 //    using OpenCL buffers.
 
 
+#include
 
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <string>
 #include <vector>
-
 #include <chrono>
 
 using namespace std::chrono;
@@ -298,7 +298,7 @@ int driver(int multiplier)
 //
 int main(int argc, char** argv)
 {
-	auto start = chrono::high_resolution_clock::now();
+	auto start = high_resolution_clock::now();
     driver(1);
 	
 	auto stop = high_resolution_clock::now();
