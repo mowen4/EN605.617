@@ -280,7 +280,7 @@ int main(int argc, char** argv)
 
     // Display output in rows
 
-	for (unsigned i = 0; i < NUM_BUFFER_ELEMENTS); i++)
+	for (unsigned i = 0; i < NUM_BUFFER_ELEMENTS; i++)
 	{
 		int temp = inputOutput[i];
 		std::cout << " " << temp;
