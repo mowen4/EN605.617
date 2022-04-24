@@ -14,8 +14,6 @@
 //    using OpenCL buffers.
 
 
-#include
-
 #include <iostream>
 #include <fstream>
 #include <sstream>
