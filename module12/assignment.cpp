@@ -296,11 +296,11 @@ int driver(int multiplier)
 //
 int main(int argc, char** argv)
 {
-	auto start = high_resolution_clock::now();
+	time_t start = high_resolution_clock::now();
     driver(1);
 	
-	auto stop = high_resolution_clock::now();
-    auto duration = duration_cast<microseconds>(stop - start);
+	time_t stop = high_resolution_clock::now();
+    time_t duration = duration_cast<microseconds>(stop - start);
 	std::cout << std::endl;
 	std::cout << "Time taken: "
 		<< (float)duration.count() / 1000000 << " seconds" << std::endl;
