@@ -18,7 +18,7 @@ __kernel void square(const uint n, __global float* buffer, __local float* partia
 	uint global_size = get_global_size(0);
 	uint local_id = get_local_id(0);
 	uint group_size = get_local_size(0);
-	cl_float temp;
+	float temp;
 
 	localSum[local_id] = buffer[global_id] + buffer[global_id+global_size];
 	
