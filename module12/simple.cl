@@ -18,13 +18,7 @@ __kernel void square(__global * buffer, __local float* shared)
 	shared[id] = 0;
 	
 	
-	buffer[id] = buffer[id] / 16;
-	
-	barrier(CLK_LOCAL_MEM_FENCE);
-	
-	shared[id] += buffer[id];
-	
-	barrier(CLK_LOCAL_MEM_FENCE);
+	shared[id] = buffer[id] / 16;
 	
 	buffer[id] = shared[id];
 }
