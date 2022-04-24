@@ -31,5 +31,5 @@ __kernel void square(const uint n, __global float* buffer, __local float* partia
 	}
 	
 	if (local_id == 0)
-		buffer[get_group_id(0)] = localSum[0] + localSum[1];
+		buffer[get_group_id(0)] = localSum[0] / 2  + localSum[1] / 2;
 }
