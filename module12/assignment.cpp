@@ -43,6 +43,7 @@ checkErr(cl_int err, const char * name)
 int main(int argc, char** argv)
 {
     cl_int errNum;
+	cl_int len = NUM_BUFFER_ELEMENTS;
     cl_uint numPlatforms;
     cl_uint numDevices;
     cl_platform_id * platformIDs;
@@ -218,7 +219,7 @@ int main(int argc, char** argv)
             "square",
             &errNum);
         checkErr(errNum, "clCreateKernel(square)");
-		errNum = clSetKernelArg(kernel, 0, sizeof(cl_int) , (void *)&NUM_BUFFER_ELEMENTS);
+		errNum = clSetKernelArg(kernel, 0, sizeof(cl_int) , (void *)&len);
         errNum = clSetKernelArg(kernel, 1, sizeof(cl_mem) , (void *)&buffers[i]);
 		errNum = clSetKernelArg(kernel, 2, 16 * sizeof(float), NULL);
 		errNum = clSetKernelArg(kernel, 3, 16 * sizeof(float), NULL);
