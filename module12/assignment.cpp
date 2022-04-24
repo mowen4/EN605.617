@@ -31,6 +31,16 @@ using namespace std::chrono;
 #define NUM_BUFFER_ELEMENTS 16
 #define BUFFER_WIDTH = 4
 
+#ifdef __APPLE__
+#include <OpenCL/cl.h>
+#else
+#include <CL/cl.h>
+#endif
+
+#if !defined(CL_CALLBACK)
+#define CL_CALLBACK
+#endif
+
 // Function to check and handle OpenCL errors
 inline void 
 checkErr(cl_int err, const char * name)
