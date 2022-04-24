@@ -282,7 +282,7 @@ int main(int argc, char** argv)
 
 	for (unsigned i = 0; i < NUM_BUFFER_ELEMENTS; i++)
 	{
-		int temp = inputOutput[i];
+		float temp = inputOutput[i];
 		std::cout << " " << temp;
 	}
 	std::cout << std::endl;
