@@ -15,9 +15,11 @@
 __kernel void square(__global * buffer, __local float* shared)
 {
 	size_t id = get_global_id(0);
+	shared[id] = 0;
+	
 	
 	buffer[id] = buffer[id] / 16;
 	
-	
+	shared[id] += buffer[id];
 	
 }
