@@ -1,61 +1,326 @@
 //
 // Book:      OpenCL(R) Programming Guide
-// Authors:   Aaftab Munshi, Benedict Gaster, Dan Ginsburg, Timothy Mattson
-// ISBN-10:   ??????????
-// ISBN-13:   ?????????????
+// Authors:   Aaftab Munshi, Benedict Gaster, Timothy Mattson, James Fung, Dan Ginsburg
+// ISBN-10:   0-321-74964-2
+// ISBN-13:   978-0-321-74964-2
 // Publisher: Addison-Wesley Professional
-// URLs:      http://safari.informit.com/??????????
-//            http://www.????????.com
+// URLs:      http://safari.informit.com/9780132488006/
+//            http://www.openclprogrammingguide.com
 //
 
-// simple.cl
+// raytracer.cpp
 //
-//    This is a simple example demonstrating buffers and sub-buffer usage
+//    This is a (very) simple raytracer that is intended to demonstrate 
+//    using OpenCL buffers.
 
-__kernel void square(__global * buffer)
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <vector>
+
+#include "info.hpp"
+
+#define DEFAULT_PLATFORM 0
+#define DEFAULT_USE_MAP false
+
+#define NUM_BUFFER_ELEMENTS 16
+#define BUFFER_WIDTH = 4
+
+// Function to check and handle OpenCL errors
+inline void 
+checkErr(cl_int err, const char * name)
 {
-	size_t id = get_global_id(0);
-	
-	buffer[id] = buffer[id] / 16;	
+    if (err != CL_SUCCESS) {
+        std::cerr << "ERROR: " <<  name << " (" << err << ")" << std::endl;
+        exit(EXIT_FAILURE);
+    }
 }
 
-
-__kernel void average2D(__global float* buffer2D, int stride, __local float* sharedMem)
+///
+//	main() for simple buffer and sub-buffer example
+//
+int main(int argc, char** argv)
 {
-	size_t x = get_global_id(0);
-	size_t y = get_global_id(1);
-	
-	size_t bufferIndex = x * stride + y;
-	size_t localIndex = x * get_global_size(0) + y;
+    cl_int errNum;
+    cl_uint numPlatforms;
+    cl_uint numDevices;
+    cl_platform_id * platformIDs;
+    cl_device_id * deviceIDs;
+    cl_context context;
+    cl_program program;
+    std::vector<cl_kernel> kernels;
+    std::vector<cl_command_queue> queues;
+    std::vector<cl_mem> buffers;
+    int * inputOutput;
 
-	int value = buffer2D[bufferIndex];
+    int platform = DEFAULT_PLATFORM; 
+    bool useMap  = DEFAULT_USE_MAP;
 
-	// DEBUG statement that correctly outputs on Intel chip
-	//printf("(%d, %d)[%d] = %d, local index: %d\n", x, y, bufferIndex, value, localIndex);
-	
-	// sum values in local memory
-	sharedMem[localIndex] = value;
 
-	// perform a reduction
-	size_t localGroupSize = get_local_size(0) * get_local_size(1);
-	int offset = localGroupSize / 2;
-	while (offset > 0) {
-		barrier(CLK_LOCAL_MEM_FENCE);
+    // First, select an OpenCL platform to run on.  
+    errNum = clGetPlatformIDs(0, NULL, &numPlatforms);
+    checkErr( 
+        (errNum != CL_SUCCESS) ? errNum : (numPlatforms <= 0 ? -1 : CL_SUCCESS), 
+        "clGetPlatformIDs"); 
+ 
+    platformIDs = (cl_platform_id *)alloca(
+            sizeof(cl_platform_id) * numPlatforms);
+
+    std::cout << "Number of platforms: \t" << numPlatforms << std::endl; 
+
+    errNum = clGetPlatformIDs(numPlatforms, platformIDs, NULL);
+    checkErr( 
+       (errNum != CL_SUCCESS) ? errNum : (numPlatforms <= 0 ? -1 : CL_SUCCESS), 
+       "clGetPlatformIDs");
+
+    std::ifstream srcFile("simple.cl");
+    checkErr(srcFile.is_open() ? CL_SUCCESS : -1, "reading simple.cl");
+
+    std::string srcProg(
+        std::istreambuf_iterator<char>(srcFile),
+        (std::istreambuf_iterator<char>()));
+
+    const char * src = srcProg.c_str();
+    size_t length = srcProg.length();
+
+    deviceIDs = NULL;
+    DisplayPlatformInfo(
+        platformIDs[platform], 
+        CL_PLATFORM_VENDOR, 
+        "CL_PLATFORM_VENDOR");
+
+    errNum = clGetDeviceIDs(
+        platformIDs[platform], 
+        CL_DEVICE_TYPE_ALL, 
+        0,
+        NULL,
+        &numDevices);
+    if (errNum != CL_SUCCESS && errNum != CL_DEVICE_NOT_FOUND)
+    {
+        checkErr(errNum, "clGetDeviceIDs");
+    }       
+
+    deviceIDs = (cl_device_id *)alloca(sizeof(cl_device_id) * numDevices);
+    errNum = clGetDeviceIDs(
+        platformIDs[platform],
+        CL_DEVICE_TYPE_ALL,
+        numDevices, 
+        &deviceIDs[0], 
+        NULL);
+    checkErr(errNum, "clGetDeviceIDs");
+
+    cl_context_properties contextProperties[] =
+    {
+        CL_CONTEXT_PLATFORM,
+        (cl_context_properties)platformIDs[platform],
+        0
+    };
+
+    context = clCreateContext(
+        contextProperties, 
+        numDevices,
+        deviceIDs, 
+        NULL,
+        NULL, 
+        &errNum);
+    checkErr(errNum, "clCreateContext");
+
+    // Create program from source
+    program = clCreateProgramWithSource(
+        context, 
+        1, 
+        &src, 
+        &length, 
+        &errNum);
+    checkErr(errNum, "clCreateProgramWithSource");
+
+    // Build program
+    errNum = clBuildProgram(
+        program,
+        numDevices,
+        deviceIDs,
+        "-I.",
+        NULL,
+        NULL);
+    if (errNum != CL_SUCCESS) 
+    {
+        // Determine the reason for the error
+        char buildLog[16384];
+        clGetProgramBuildInfo(
+            program, 
+            deviceIDs[0], 
+            CL_PROGRAM_BUILD_LOG,
+            sizeof(buildLog), 
+            buildLog, 
+            NULL);
+
+            std::cerr << "Error in OpenCL C source: " << std::endl;
+            std::cerr << buildLog;
+            checkErr(errNum, "clBuildProgram");
+    }
+
+    // create buffers and sub-buffers
+    inputOutput = new int[NUM_BUFFER_ELEMENTS * numDevices];
+    for (unsigned int i = 0; i < NUM_BUFFER_ELEMENTS * numDevices; i++)
+    {
+        inputOutput[i] = i * i;
+    }
+
+    // create a single buffer to cover all the input data
+    cl_mem main_buffer = clCreateBuffer(
+        context,
+        CL_MEM_READ_WRITE,
+        sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
+        NULL,
+        &errNum);
+    checkErr(errNum, "clCreateBuffer");
+
+    // now for all devices other than the first create a sub-buffer
+    for (unsigned int i = 0; i < 4; i++)
+    {
+        cl_buffer_region region = 
+            {
+                4 * i * sizeof(int), 
+                4 * sizeof(int)
+            };
+        cl_mem buffer = clCreateSubBuffer(
+            main_buffer,
+            CL_MEM_READ_WRITE,
+            CL_BUFFER_CREATE_TYPE_REGION,
+            &region,
+            &errNum);
+        checkErr(errNum, "clCreateSubBuffer");
+
+        buffers.push_back(buffer);
+    }
+
+    // Create command queues
+    for (unsigned int i = 0; i < 4; i++)
+    {
+        InfoDevice<cl_device_type>::display(
+            deviceIDs[0], 
+            CL_DEVICE_TYPE, 
+            "CL_DEVICE_TYPE");
+
+        cl_command_queue queue = 
+            clCreateCommandQueue(
+                context,
+                deviceIDs[0],
+                0,
+                &errNum);
+        checkErr(errNum, "clCreateCommandQueue");
+
+        queues.push_back(queue);
+
+        cl_kernel kernel = clCreateKernel(
+            program,
+            "2daverage",
+            &errNum);
+        checkErr(errNum, "clCreateKernel(2daverage)");
+
+        errNum = clSetKernelArg(kernel, 0, sizeof(cl_mem) , (void *)&buffers[i]);
+		errNum |= clSetKernelArg(kernel, 1, sizeof(BUFFER_WIDTH), &BUFFER_WIDTH);
+		errNum |= clSetKernelArg(kernel, 2, 2 * 2 * sizeof(float), NULL);
 		
-		if (localIndex < offset) {
-			sharedMem[localIndex] += sharedMem[localIndex + offset];
-		}
+        checkErr(errNum, "clSetKernelArg(2daverage)");
 
-		offset /= 2;
-	}
+        kernels.push_back(kernel);
+    }
 
-	// clear out old memory for print readability
-	buffer2D[bufferIndex] = 0;
+	// Write input data
+	errNum = clEnqueueWriteBuffer(
+		queues[numDevices - 1],
+		main_buffer,
+		CL_TRUE,
+		0,
+		sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
+		(void*)inputOutput,
+		0,
+		NULL,
+		NULL);
+	/*	
+	int ptr[16] = {10,10,10,10,0,1,2,3,4,5,6,7,8,9,10,10};
+	size_t buffer_origin[3] = {0*sizeof(int),0,0};
+	size_t host_origin[3] = {0,0,0};
+	size_t region[3] = {4*sizeof(int), 4, 1};	
+	
+	errNum = clEnqueueWriteBufferRect(
+		queues[numDevices - 1],
+		main_buffer,
+		CL_TRUE,
+		buffer_origin,
+		host_origin,
+		region,
+		(NUM_BUFFER_ELEMENTS / 4) * sizeof(int),
+		0,
+		0,
+		2 * sizeof(int),
+		(void*)ptr,
+		0,
+		NULL,
+		NULL);
+	
+	std::cout << ptr[0] << std::endl;
+	*/
+	
+    std::vector<cl_event> events;
+    // call kernel for each device
+    for (unsigned int i = 0; i < queues.size(); i++)
+    {
+        cl_event event;
 
-	if (localIndex == 0) {
-		printf("Sum: %f\n", sharedMem[0]);
-		printf("Average: %f\n\n", sharedMem[0] / localGroupSize);
+        size_t gWI = 4;
 
-		buffer2D[bufferIndex] = sharedMem[0] / localGroupSize;
-	}
+        errNum = clEnqueueNDRangeKernel(
+            queues[i], 
+            kernels[i], 
+            1, 
+            NULL,
+            (const size_t*)&gWI, 
+            (const size_t*)NULL, 
+            NULL, 
+            0, 
+            &event);
+
+        events.push_back(event);
+    }
+
+    // Technically don't need this as we are doing a blocking read
+    // with in-order queue.
+    clWaitForEvents(events.size(), &events[0]);
+
+	// Read back computed data
+	clEnqueueReadBuffer(
+		queues[numDevices - 1],
+		main_buffer,
+		CL_TRUE,
+		0,
+		sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
+		(void*)inputOutput,
+		0,
+		NULL,
+		NULL);
+
+    // Display output in rows
+	int av = 0;
+	
+    for (unsigned i = 0; i < numDevices; i++)
+    {
+        for (unsigned elems = i * NUM_BUFFER_ELEMENTS; elems < ((i+1) * NUM_BUFFER_ELEMENTS); elems++)
+        {
+			int temp = inputOutput[elems];
+			av += temp;
+            std::cout << " " << temp;
+        }
+        std::cout << std::endl;
+		std::cout << "Average is: " << av << std::endl;
+
+    }
+
+    std::cout << "Program completed successfully" << std::endl;
+	
+	
+
+    return 0;
 }
