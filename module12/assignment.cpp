@@ -165,7 +165,7 @@ int main(int argc, char** argv)
     inputOutput = new cl_float[NUM_BUFFER_ELEMENTS * numDevices];
     for (unsigned int i = 0; i < NUM_BUFFER_ELEMENTS * numDevices; i++)
     {
-        inputOutput[i] = i * i;
+        inputOutput[i] = i;
     }
 
     // create a single buffer to cover all the input data
@@ -281,8 +281,6 @@ int main(int argc, char** argv)
 	std::cout << "Average is: " << inputOutput[0] << std::endl;
 
     std::cout << "Program completed successfully" << std::endl;
-	
-	
 
     return 0;
 }
