@@ -32,8 +32,4 @@ __kernel void square(const uint n, __global float* buffer, __local float* partia
 	
 	if (local_id == 0)
 		buffer[get_group_id(0)] = localSum[0] + localSum[1];
-	
-	//size_t id = get_global_id(0);
-	//shared[id] = buffer[id] / 16;
-	//buffer[id] = shared[id];
 }
