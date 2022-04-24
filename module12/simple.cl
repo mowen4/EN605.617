@@ -18,7 +18,6 @@ __kernel void square(const uint n, __global float* buffer, __local float* partia
 	uint global_size = get_global_size(0);
 	uint local_id = get_local_id(0);
 	uint group_size = get_local_size(0);
-	float temp;
 
 	localSum[local_id] = buffer[global_id] + buffer[global_id+global_size];
 	
@@ -27,8 +26,7 @@ __kernel void square(const uint n, __global float* buffer, __local float* partia
 	for(uint stride=group_size/2; stride > 1; stride >>=1) {
 	if (local_id <stride)
 		localSum[local_id] += localSum[local_id + stride];
-		temp = localSum[local_id] / 2;
-		localSum[local_id] = temp;
+		localSum[local_id] /= 2;
 	barrier(CLK_LOCAL_MEM_FENCE);
 	}
 	
