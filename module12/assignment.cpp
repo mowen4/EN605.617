@@ -278,14 +278,6 @@ int main(int argc, char** argv)
 		NULL,
 		NULL);
 
-    // Display output in rows
-
-	for (unsigned i = 0; i < NUM_BUFFER_ELEMENTS; i++)
-	{
-		float temp = inputOutput[i];
-		std::cout << " " << temp;
-	}
-	std::cout << std::endl;
 	std::cout << "Average is: " << inputOutput[0] << std::endl;
 
     std::cout << "Program completed successfully" << std::endl;
