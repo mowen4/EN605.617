@@ -20,6 +20,11 @@ __kernel void square(__global * buffer, __local float* shared)
 	
 	buffer[id] = buffer[id] / 16;
 	
+	barrier(CLK_LOCAL_MEM_FENCE);
+	
 	shared[id] += buffer[id];
 	
+	barrier(CLK_LOCAL_MEM_FENCE);
+	
+	buffer[id] = shared[id];
 }
