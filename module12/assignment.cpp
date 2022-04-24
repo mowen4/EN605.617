@@ -25,6 +25,7 @@
 #define DEFAULT_USE_MAP false
 
 #define NUM_BUFFER_ELEMENTS 16
+#define BUFFER_WIDTH = 4
 
 // Function to check and handle OpenCL errors
 inline void 
