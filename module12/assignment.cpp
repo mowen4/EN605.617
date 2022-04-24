@@ -220,7 +220,7 @@ int main(int argc, char** argv)
         checkErr(errNum, "clCreateKernel(square)");
 
         errNum = clSetKernelArg(kernel, 0, sizeof(cl_mem) , (void *)&buffers[i]);
-		
+		errNum = clSetKernelArg(kernel, 1, 16 * sizeof(float), NULL);
         checkErr(errNum, "clSetKernelArg(square)");
 
         kernels.push_back(kernel);
