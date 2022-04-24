@@ -26,7 +26,7 @@ __kernel void square(const uint n, __global float* buffer, __local float* partia
 	for(uint stride=group_size/2; stride > 1; stride >>=1) {
 	if (local_id <stride)
 		localSum[local_id] += localSum[local_id + stride];
-		float(localSum) a/= 2;
+		(float)localSum a/= 2;
 	barrier(CLK_LOCAL_MEM_FENCE);
 	}
 	
