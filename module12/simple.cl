@@ -26,10 +26,10 @@ __kernel void square(const uint n, __global float* buffer, __local float* partia
 	for(uint stride=group_size/2; stride > 1; stride >>=1) {
 	if (local_id <stride)
 		localSum[local_id] += localSum[local_id + stride];
-		localSum[local_id] /= 2;
 	barrier(CLK_LOCAL_MEM_FENCE);
 	}
 	
 	if (local_id == 0)
-		buffer[get_group_id(0)] = localSum[0] / 2  + localSum[1] / 2;
+		buffer[get_group_id(0)] = localSum[0] + localSum[1];
+		
 }
