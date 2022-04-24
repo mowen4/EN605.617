@@ -272,7 +272,7 @@ int driver(int multiplier)
 		NULL,
 		NULL);
 
-	std::cout << "Average of buffer with multiplier: "<< multiplier << " is" << inputOutput[0] << std::endl;
+	std::cout << "Average of buffer with multiplier: "<< multiplier << " is " << inputOutput[0] << std::endl;
 
     std::cout << "Run complete" << std::endl;
 }
