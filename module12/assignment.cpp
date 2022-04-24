@@ -37,12 +37,10 @@ checkErr(cl_int err, const char * name)
     }
 }
 
-///
-//	main() for simple buffer and sub-buffer example
-//
-int main(int argc, char** argv)
+
+int driver(int multiplier)
 {
-    cl_int errNum;
+	cl_int errNum;
 	cl_int len = NUM_BUFFER_ELEMENTS;
     cl_uint numPlatforms;
     cl_uint numDevices;
@@ -165,7 +163,7 @@ int main(int argc, char** argv)
     inputOutput = new cl_float[NUM_BUFFER_ELEMENTS * numDevices];
     for (unsigned int i = 0; i < NUM_BUFFER_ELEMENTS * numDevices; i++)
     {
-        inputOutput[i] = i * i;
+        inputOutput[i] = multiplier * i;
     }
 
     // create a single buffer to cover all the input data
@@ -274,9 +272,19 @@ int main(int argc, char** argv)
 		NULL,
 		NULL);
 
-	std::cout << "Average is: " << inputOutput[0] << std::endl;
+	std::cout << "Average of buffer with multiplier: "<< multiplier << " is" << inputOutput[0] << std::endl;
 
-    std::cout << "Program completed successfully" << std::endl;
+    std::cout << "Run complete" << std::endl;
+}
+
+///
+//	main() for simple buffer and sub-buffer example
+//
+int main(int argc, char** argv)
+{
+    driver(1);
+	driver(2);
+	driver(3);
 
     return 0;
 }
