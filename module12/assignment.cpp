@@ -53,7 +53,7 @@ int main(int argc, char** argv)
     std::vector<cl_kernel> kernels;
     std::vector<cl_command_queue> queues;
     std::vector<cl_mem> buffers;
-    float * inputOutput;
+    int * inputOutput;
 
     int platform = DEFAULT_PLATFORM; 
     bool useMap  = DEFAULT_USE_MAP;
@@ -162,7 +162,7 @@ int main(int argc, char** argv)
     }
 
     // create buffers and sub-buffers
-    inputOutput = new float[NUM_BUFFER_ELEMENTS * numDevices];
+    inputOutput = new int[NUM_BUFFER_ELEMENTS * numDevices];
     for (unsigned int i = 0; i < NUM_BUFFER_ELEMENTS * numDevices; i++)
     {
         inputOutput[i] = i * i;
@@ -172,7 +172,7 @@ int main(int argc, char** argv)
     cl_mem main_buffer = clCreateBuffer(
         context,
         CL_MEM_READ_WRITE,
-        sizeof(float) * NUM_BUFFER_ELEMENTS * numDevices,
+        sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
         NULL,
         &errNum);
     checkErr(errNum, "clCreateBuffer");
@@ -182,8 +182,8 @@ int main(int argc, char** argv)
     {
         cl_buffer_region region = 
             {
-                4 * i * sizeof(float), 
-                4 * sizeof(float)
+                4 * i * sizeof(int), 
+                4 * sizeof(int)
             };
         cl_mem buffer = clCreateSubBuffer(
             main_buffer,
@@ -234,7 +234,7 @@ int main(int argc, char** argv)
 		main_buffer,
 		CL_TRUE,
 		0,
-		sizeof(float) * NUM_BUFFER_ELEMENTS * numDevices,
+		sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
 		(void*)inputOutput,
 		0,
 		NULL,
@@ -296,7 +296,7 @@ int main(int argc, char** argv)
 		main_buffer,
 		CL_TRUE,
 		0,
-		sizeof(float) * NUM_BUFFER_ELEMENTS * numDevices,
+		sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
 		(void*)inputOutput,
 		0,
 		NULL,
@@ -314,7 +314,7 @@ int main(int argc, char** argv)
             std::cout << " " << temp;
         }
         std::cout << std::endl;
-		std::cout << "Average is: " << inputOutput[0] << std::endl;
+		std::cout << "Average is: " << av << std::endl;
 
     }
 
