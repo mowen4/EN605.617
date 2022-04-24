@@ -20,7 +20,6 @@
 #include <vector>
 
 #include "info.hpp"
-#include "TimeBlock.h"
 
 #define DEFAULT_PLATFORM 0
 #define DEFAULT_USE_MAP false
@@ -289,8 +288,6 @@ int main(int argc, char** argv)
     int platform = DEFAULT_PLATFORM; 
     bool useMap  = DEFAULT_USE_MAP;
 
-    TimeCodeBlock programRuntime("Program runtime (runtime bloated by print statements)");
-
     std::cout << "Simple buffer and sub-buffer Example" << std::endl;
 
     for (int i = 1; i < argc; i++)
@@ -340,8 +337,6 @@ int main(int argc, char** argv)
 
     // The code below has too many variable dependencies to be worthwhile to refactor into smaller functions.
     // Leave as is.
-
-    TimeCodeBlock* kernelLifeCycle = new TimeCodeBlock("Copy to device until copy from device");
 
 
     if (useMap) 
