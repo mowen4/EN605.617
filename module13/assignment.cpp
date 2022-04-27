@@ -356,7 +356,7 @@ int main(int argc, char** argv)
 		(void*)inputOutput0,
 		10,
 		event0,
-		NULL);
+		read[0]);
 		
 	clEnqueueReadBuffer(
 		queue1,
@@ -367,7 +367,9 @@ int main(int argc, char** argv)
 		(void*)inputOutput1,
 		10,
 		event1,
-		NULL);
+		read[1]);
+		
+	clWaitForEvents(2, read)
 
 	//find a way to fire the first kernel event
 
