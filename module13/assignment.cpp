@@ -341,12 +341,12 @@ int main(int argc, char** argv)
 		  read, 
 		  &calc[1]); 
 		  
-	}
+	//}
 	
 	//find a way to fire the first kernel event
 	
-	for (int i = 0 ; i < 10; i++)
-	{
+	//for (int i = 0 ; i < 10; i++)
+	//{
 		clEnqueueReadBuffer(
 			queue0,
 			buffer0,
