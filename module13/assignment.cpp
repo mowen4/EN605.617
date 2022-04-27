@@ -377,8 +377,8 @@ int main(int argc, char** argv)
 		clEnqueueMarker(queue1, &waitMarker);
 	}
 	
-	errNum = clEnqueueBarrier(queue0);
- 	errNum = clEnqueueWaitForEvents(queue0, 1, &event1);
+	//errNum = clEnqueueBarrier(queue0);
+ 	//errNum = clEnqueueWaitForEvents(queue0, 1, &event1);
 	
 	
 			
