@@ -326,8 +326,8 @@ int main(int argc, char** argv)
 		  NULL,
 		  (const size_t*)&gWI, 
 		  (const size_t*)NULL, 
-		  2, 
-		  read, 
+		  1, 
+		  read[i], 
 		  &calc[0]);
 
 		errNum = clEnqueueNDRangeKernel(
@@ -370,6 +370,8 @@ int main(int argc, char** argv)
 			&read[1]);
 	}
 	
+	errNum = clEnqueueBarrier(queue0);
+	errNum = clEnqueueBarrier(queue1);
 			
 					// Display output in rows
 	for (unsigned elems = 0; elems < NUM_BUFFER_ELEMENTS; elems++)
