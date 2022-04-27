@@ -317,7 +317,7 @@ int main(int argc, char** argv)
 	cl_event event1;
     size_t gWI = NUM_BUFFER_ELEMENTS;
 
-	for (int i = 0 ; i < 5; i++)
+	for (int i = 0 ; i < 2; i++)
 	{
 
 		errNum = clEnqueueNDRangeKernel(
