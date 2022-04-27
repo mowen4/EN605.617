@@ -314,6 +314,7 @@ int main(int argc, char** argv)
     // call kernel for each device
     cl_event event0, event1;
 	cl_event read[2];
+	cl_event waitMarker;
     size_t gWI = NUM_BUFFER_ELEMENTS;
 
 	for (int i = 0 ; i < 10; i++)
@@ -339,14 +340,17 @@ int main(int argc, char** argv)
 		  (const size_t*)NULL, 
 		  0, 
 		  NULL, 
-		  &event1); 
+		  &event1);
+		  
+		  clEnqueueMarker(queue0, waitMarker)
 		  
 	}
 	
 	//find a way to fire the first kernel event
 	
-	//for (int i = 0 ; i < 10; i++)
-	//{
+	for (int i = 0 ; i < 10; i++)
+	{
+
 		clEnqueueReadBuffer(
 			queue0,
 			buffer0,
@@ -355,7 +359,7 @@ int main(int argc, char** argv)
 			sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
 			(void*)inputOutput0,
 			1,
-			&event0,
+			&waitMarker,
 			NULL);
 			
 		clEnqueueReadBuffer(
@@ -365,12 +369,10 @@ int main(int argc, char** argv)
 			0,
 			sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
 			(void*)inputOutput1,
-			1,
-			&event1,
+			0,
+			0,
 			NULL);
-	
-	errNum = clEnqueueBarrier(queue0);
-	errNum = clEnqueueBarrier(queue1);
+	}
 			
 					// Display output in rows
 	for (unsigned elems = 0; elems < NUM_BUFFER_ELEMENTS; elems++)
