@@ -368,20 +368,22 @@ int main(int argc, char** argv)
 			2,
 			calc,
 			&read[1]);
+	}
+	
 			
 					// Display output in rows
-		for (unsigned elems = 0; elems < NUM_BUFFER_ELEMENTS; elems++)
-		{
-		 std::cout << " " << inputOutput0[elems];
-		}
-		std::cout << std::endl;
-	 
-		for (unsigned elems = 0; elems < NUM_BUFFER_ELEMENTS; elems++)
-		{
-		 std::cout << " " << inputOutput1[elems];
-		}
-		std::cout << std::endl;
+	for (unsigned elems = 0; elems < NUM_BUFFER_ELEMENTS; elems++)
+	{
+	 std::cout << " " << inputOutput0[elems];
 	}
+	std::cout << std::endl;
+ 
+	for (unsigned elems = 0; elems < NUM_BUFFER_ELEMENTS; elems++)
+	{
+	 std::cout << " " << inputOutput1[elems];
+	}
+	std::cout << std::endl;
+
 
  	//Wait for queue 1 to complete before continuing on queue 0
  	//errNum = clEnqueueBarrier(queue0);
