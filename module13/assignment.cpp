@@ -326,8 +326,8 @@ int main(int argc, char** argv)
 		  NULL,
 		  (const size_t*)&gWI, 
 		  (const size_t*)NULL, 
-		  1, 
-		  read[i], 
+		  2, 
+		  read, 
 		  &calc[0]);
 
 		errNum = clEnqueueNDRangeKernel(
