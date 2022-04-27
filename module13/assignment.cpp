@@ -344,6 +344,31 @@ int main(int argc, char** argv)
 		  &event1[i]); 
 		  
 	}
+	
+	clEnqueueReadBuffer(
+		queue0,
+		buffer0,
+		CL_TRUE,
+		0,
+		sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
+		(void*)inputOutput0,
+		0,
+		NULL],
+		&read0);
+		
+	clEnqueueReadBuffer(
+		queue1,
+		buffer1,
+		CL_TRUE,
+		0,
+		sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
+		(void*)inputOutput1,
+		0,
+		NULL,
+		&read1);
+	
+	//find a way to fire the first kernel event
+	
 	for (int i = 0 ; i < 10; i++)
 	{
 		clEnqueueReadBuffer(
