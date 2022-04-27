@@ -357,7 +357,7 @@ int main(int argc, char** argv)
 	
 	for (int i = 0 ; i < 10; i++)
 	{
-		clWaitForEvents(events0.size(), &events0[i])
+		clWaitForEvents(events0.size(), &events0[i]);
 
 		// Read back computed data
 		clEnqueueReadBuffer(
@@ -371,7 +371,7 @@ int main(int argc, char** argv)
 				NULL,
 				NULL);
 				
-		clWaitForEvents(events1.size(), &events1[i])
+		clWaitForEvents(events1.size(), &events1[i]);
 		
 		clEnqueueReadBuffer(
 				queue1,
