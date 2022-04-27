@@ -314,8 +314,7 @@ int main(int argc, char** argv)
     // call kernel for each device
     cl_event event0[10];
 	cl_event event1[10];
-	cl_event read0;
-	cl_event read1;
+	cl_event read[2];
     size_t gWI = NUM_BUFFER_ELEMENTS;
 
 	for (int i = 0 ; i < 10; i++)
@@ -328,9 +327,9 @@ int main(int argc, char** argv)
 		  NULL,
 		  (const size_t*)&gWI, 
 		  (const size_t*)NULL, 
-		  1, 
-		  &read0, 
-		  &event0[i]);
+		  2, 
+		  read, 
+		  NULL);
 
 		errNum = clEnqueueNDRangeKernel(
 		  queue1, 
@@ -339,33 +338,11 @@ int main(int argc, char** argv)
 		  NULL,
 		  (const size_t*)&gWI, 
 		  (const size_t*)NULL, 
-		  1, 
-		  &read1, 
-		  &event1[i]); 
+		  2, 
+		  read, 
+		  NULL); 
 		  
 	}
-	
-	clEnqueueReadBuffer(
-		queue0,
-		buffer0,
-		CL_TRUE,
-		0,
-		sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
-		(void*)inputOutput0,
-		0,
-		NULL,
-		&read0);
-		
-	clEnqueueReadBuffer(
-		queue1,
-		buffer1,
-		CL_TRUE,
-		0,
-		sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
-		(void*)inputOutput1,
-		0,
-		NULL,
-		&read1);
 	
 	//find a way to fire the first kernel event
 	
@@ -378,10 +355,10 @@ int main(int argc, char** argv)
 			0,
 			sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
 			(void*)inputOutput0,
-			1,
-			&event0[i],
-			&read0);
-		  
+			0,
+			NULL,
+			&read[0]);
+			
 		clEnqueueReadBuffer(
 			queue1,
 			buffer1,
@@ -389,9 +366,9 @@ int main(int argc, char** argv)
 			0,
 			sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
 			(void*)inputOutput1,
-			1,
-			&event1[i],
-			&read1);
+			0,
+			NULL,
+			&read[1]);
 			
 					// Display output in rows
 		for (unsigned elems = 0; elems < NUM_BUFFER_ELEMENTS; elems++)
