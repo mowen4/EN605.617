@@ -342,7 +342,7 @@ int main(int argc, char** argv)
 		  NULL, 
 		  &event1);
 		  
-		  clEnqueueMarker(queue0, waitMarker);
+		  clEnqueueMarker(queue0, &waitMarker);
 		  
 	}
 	
