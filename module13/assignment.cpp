@@ -353,8 +353,8 @@ int main(int argc, char** argv)
 			0,
 			sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
 			(void*)inputOutput0,
-			1,
-			&event0[i],
+			i,
+			event0,
 			&read0[i]);
 		  
 		clEnqueueReadBuffer(
@@ -364,8 +364,8 @@ int main(int argc, char** argv)
 			0,
 			sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
 			(void*)inputOutput1,
-			1,
-			&event1[i],
+			i,
+			event1,
 			&read1[i]);
 			
 					// Display output in rows
