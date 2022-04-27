@@ -312,7 +312,7 @@ int main(int argc, char** argv)
     std::vector<cl_event> events;
     // call kernel for each device
     cl_event event0;
-
+	cl_event event1;
     size_t gWI = NUM_BUFFER_ELEMENTS;
 
 	for (int i = 0 ; i < 5; i++)
@@ -329,7 +329,7 @@ int main(int argc, char** argv)
 		  0, 
 		  &event0);
 		
-		cl_event event1;
+
 		errNum = clEnqueueMarker(queue1, &event1);
 
 		errNum = clEnqueueNDRangeKernel(
@@ -344,6 +344,7 @@ int main(int argc, char** argv)
 		  &event0); 
  	
 	}
+	
  	//Wait for queue 1 to complete before continuing on queue 0
  	errNum = clEnqueueBarrier(queue0);
  	errNum = clEnqueueWaitForEvents(queue0, 1, &event1);
