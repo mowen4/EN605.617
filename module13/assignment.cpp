@@ -328,8 +328,8 @@ int main(int argc, char** argv)
 		  NULL,
 		  (const size_t*)&gWI, 
 		  (const size_t*)NULL, 
-		  0, 
-		  0, 
+		  1, 
+		  &read0[i], 
 		  &event0[i]);
 
 		errNum = clEnqueueNDRangeKernel(
@@ -339,8 +339,8 @@ int main(int argc, char** argv)
 		  NULL,
 		  (const size_t*)&gWI, 
 		  (const size_t*)NULL, 
-		  0, 
-		  0, 
+		  1, 
+		  &read1[i], 
 		  &event1[i]); 
 		  
 		
@@ -357,7 +357,7 @@ int main(int argc, char** argv)
 			(void*)inputOutput0,
 			1,
 			&event0[i],
-			NULL);
+			&read0[i]);
 		  
 		clEnqueueReadBuffer(
 			queue1,
@@ -368,7 +368,7 @@ int main(int argc, char** argv)
 			(void*)inputOutput1,
 			1,
 			&event1[i],
-			NULL);
+			&read1[i]);
 			
 					// Display output in rows
 		for (unsigned elems = 0; elems < NUM_BUFFER_ELEMENTS; elems++)
