@@ -310,6 +310,28 @@ int main(int argc, char** argv)
       0,
       NULL,
       NULL);
+	  
+	clEnqueueReadBuffer(
+		queue0,
+		buffer0,
+		CL_TRUE,
+		0,
+		sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
+		(void*)inputOutput0,
+		10,
+		event0,
+		NULL);
+		
+	clEnqueueReadBuffer(
+		queue1,
+		buffer1,
+		CL_TRUE,
+		0,
+		sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
+		(void*)inputOutput1,
+		10,
+		event1,
+		NULL);
  
     // call kernel for each device
     cl_event event0[10], event1[10];
@@ -345,28 +367,6 @@ int main(int argc, char** argv)
 	}
 
 	//find a way to fire the first kernel event
-
-	clEnqueueReadBuffer(
-		queue0,
-		buffer0,
-		CL_TRUE,
-		0,
-		sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
-		(void*)inputOutput0,
-		10,
-		event0,
-		NULL);
-		
-	clEnqueueReadBuffer(
-		queue1,
-		buffer1,
-		CL_TRUE,
-		0,
-		sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
-		(void*)inputOutput1,
-		10,
-		event1,
-		NULL);
 
 	
 	//errNum = clEnqueueBarrier(queue0);
