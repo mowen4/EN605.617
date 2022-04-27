@@ -318,28 +318,6 @@ int main(int argc, char** argv)
 	cl_event read[2];
 	cl_event waitMarker;
 	
-	clEnqueueReadBuffer(
-		queue0,
-		buffer0,
-		CL_TRUE,
-		0,
-		sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
-		(void*)inputOutput0,
-		10,
-		event0,
-		NULL);
-		
-	clEnqueueReadBuffer(
-		queue1,
-		buffer1,
-		CL_TRUE,
-		0,
-		sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
-		(void*)inputOutput1,
-		10,
-		event1,
-		NULL);
-	
     size_t gWI = NUM_BUFFER_ELEMENTS;
 
 	for (int i = 0 ; i < 10; i++)
@@ -368,6 +346,28 @@ int main(int argc, char** argv)
 		  &event1[i]);
 		
 	}
+	
+	clEnqueueReadBuffer(
+		queue0,
+		buffer0,
+		CL_FALSE,
+		0,
+		sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
+		(void*)inputOutput0,
+		10,
+		event0,
+		NULL);
+		
+	clEnqueueReadBuffer(
+		queue1,
+		buffer1,
+		CL_FALSE,
+		0,
+		sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
+		(void*)inputOutput1,
+		10,
+		event1,
+		NULL);
 
 	//find a way to fire the first kernel event
 
