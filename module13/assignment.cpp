@@ -328,7 +328,7 @@ int main(int argc, char** argv)
 		  NULL,
 		  (const size_t*)&gWI, 
 		  (const size_t*)NULL, 
-		  2, 
+		  10, 
 		  &read0[i], 
 		  &event0[i]);
 
@@ -339,7 +339,7 @@ int main(int argc, char** argv)
 		  NULL,
 		  (const size_t*)&gWI, 
 		  (const size_t*)NULL, 
-		  2, 
+		  1, 
 		  &read1[i], 
 		  &event1[i]); 
 		  
@@ -349,7 +349,7 @@ int main(int argc, char** argv)
 		clEnqueueReadBuffer(
 			queue0,
 			buffer0,
-			CL_FALSE,
+			CL_TRUE,
 			0,
 			sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
 			(void*)inputOutput0,
@@ -360,7 +360,7 @@ int main(int argc, char** argv)
 		clEnqueueReadBuffer(
 			queue1,
 			buffer1,
-			CL_FALSE,
+			CL_TRUE,
 			0,
 			sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
 			(void*)inputOutput1,
