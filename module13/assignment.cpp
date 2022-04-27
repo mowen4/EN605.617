@@ -312,8 +312,10 @@ int main(int argc, char** argv)
       NULL);
  
     // call kernel for each device
-    cl_event event0;
-	cl_event event1;
+    cl_event event0[10];
+	cl_event event1[10];
+	cl_event read0[10];
+	cl_event read1[10];
     size_t gWI = NUM_BUFFER_ELEMENTS;
 
 	for (int i = 0 ; i < 10; i++)
@@ -328,7 +330,7 @@ int main(int argc, char** argv)
 		  (const size_t*)NULL, 
 		  0, 
 		  0, 
-		  &event0);
+		  &event0[i]);
 
 		errNum = clEnqueueNDRangeKernel(
 		  queue1, 
@@ -339,8 +341,13 @@ int main(int argc, char** argv)
 		  (const size_t*)NULL, 
 		  0, 
 		  0, 
-		  &event1); 
+		  &event1[i]); 
 		  
+		
+	
+	}
+	for (int i = 0 ; i < 10; i++)
+	{
 		clEnqueueReadBuffer(
 			queue0,
 			buffer0,
@@ -348,8 +355,8 @@ int main(int argc, char** argv)
 			0,
 			sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
 			(void*)inputOutput0,
-			0,
-			NULL,
+			1,
+			&event0[i],
 			NULL);
 		  
 		clEnqueueReadBuffer(
@@ -359,8 +366,8 @@ int main(int argc, char** argv)
 			0,
 			sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
 			(void*)inputOutput1,
-			0,
-			NULL,
+			1,
+			&event1[i],
 			NULL);
 			
 					// Display output in rows
@@ -375,7 +382,6 @@ int main(int argc, char** argv)
 		 std::cout << " " << inputOutput1[elems];
 		}
 		std::cout << std::endl;
-	
 	}
 
  	//Wait for queue 1 to complete before continuing on queue 0
