@@ -341,12 +341,15 @@ int main(int argc, char** argv)
 		  1, 
 		  &waitMarker, 
 		  &event1);
-		  
-		  
+		
+		clWaitForEvents(queue0, 1, &waitMarker);
+
 	}
 	
 
 	//find a way to fire the first kernel event
+	clWaitForEvents(queue0, 1, &waitMarker);
+	
 	
 	for (int i = 0 ; i < 10; i++)
 	{
@@ -371,10 +374,8 @@ int main(int argc, char** argv)
 			(void*)inputOutput1,
 			0,
 			0,
-			NULL);
-			
-		clEnqueueMarker(queue0, &waitMarker);
-		clEnqueueMarker(queue1, &waitMarker);
+			&waitMarker);
+
 	}
 	
 	//errNum = clEnqueueBarrier(queue0);
