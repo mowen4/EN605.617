@@ -369,7 +369,7 @@ int main(int argc, char** argv)
 		event1,
 		read[1]);
 		
-	clWaitForEvents(2, read)
+	clWaitForEvents(2, read);
 
 	//find a way to fire the first kernel event
 
