@@ -353,7 +353,7 @@ int main(int argc, char** argv)
 		sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
 		(void*)inputOutput0,
 		0,
-		NULL],
+		NULL,
 		&read0);
 		
 	clEnqueueReadBuffer(
