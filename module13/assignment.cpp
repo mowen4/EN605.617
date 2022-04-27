@@ -54,6 +54,8 @@ int main(int argc, char** argv)
     cl_context context1;
     cl_program program1;
     int * inputOutput1;
+	int * inputOutput2;
+	int * inputOutput3;
 
     int platform = DEFAULT_PLATFORM; 
 
