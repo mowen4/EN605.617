@@ -345,8 +345,7 @@ int main(int argc, char** argv)
 		  
 	}
 	
-	errNum = clEnqueueBarrier(queue0);
- 	errNum = clEnqueueWaitForEvents(queue0, 1, &event1);
+
 	//find a way to fire the first kernel event
 	
 	for (int i = 0 ; i < 10; i++)
@@ -373,8 +372,13 @@ int main(int argc, char** argv)
 			0,
 			0,
 			NULL);
+			
+		
 
 	}
+	
+	errNum = clEnqueueBarrier(queue0);
+ 	errNum = clEnqueueWaitForEvents(queue0, 1, &event1);
 	
 	
 			
