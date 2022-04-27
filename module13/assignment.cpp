@@ -354,8 +354,8 @@ int main(int argc, char** argv)
 			0,
 			sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
 			(void*)inputOutput0,
-			2,
-			read,
+			1,
+			event0,
 			NULL);
 			
 		clEnqueueReadBuffer(
@@ -365,8 +365,8 @@ int main(int argc, char** argv)
 			0,
 			sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
 			(void*)inputOutput1,
-			2,
-			read,
+			1,
+			event1,
 			NULL);
 	
 	errNum = clEnqueueBarrier(queue0);
