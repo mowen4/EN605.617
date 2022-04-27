@@ -329,7 +329,7 @@ int main(int argc, char** argv)
 		  (const size_t*)&gWI, 
 		  (const size_t*)NULL, 
 		  10, 
-		  &read0[i], 
+		  read0, 
 		  &event0[i]);
 
 		errNum = clEnqueueNDRangeKernel(
