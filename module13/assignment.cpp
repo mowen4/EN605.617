@@ -368,7 +368,6 @@ int main(int argc, char** argv)
 			0,
 			NULL,
 			NULL);
-	}
 	
 	errNum = clEnqueueBarrier(queue0);
 	errNum = clEnqueueBarrier(queue1);
