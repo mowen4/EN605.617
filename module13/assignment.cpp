@@ -328,7 +328,7 @@ int main(int argc, char** argv)
 		  NULL,
 		  (const size_t*)&gWI, 
 		  (const size_t*)NULL, 
-		  10, 
+		  12, 
 		  read0, 
 		  &event0[i]);
 
@@ -339,8 +339,8 @@ int main(int argc, char** argv)
 		  NULL,
 		  (const size_t*)&gWI, 
 		  (const size_t*)NULL, 
-		  1, 
-		  &read1[i], 
+		  12, 
+		  read1, 
 		  &event1[i]); 
 		  
 	}
