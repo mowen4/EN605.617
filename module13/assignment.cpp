@@ -343,15 +343,13 @@ int main(int argc, char** argv)
 		  &read1[i], 
 		  &event1[i]); 
 		  
-		
-	
 	}
 	for (int i = 0 ; i < 10; i++)
 	{
 		clEnqueueReadBuffer(
 			queue0,
 			buffer0,
-			CL_TRUE,
+			CL_FALSE,
 			0,
 			sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
 			(void*)inputOutput0,
@@ -362,7 +360,7 @@ int main(int argc, char** argv)
 		clEnqueueReadBuffer(
 			queue1,
 			buffer1,
-			CL_TRUE,
+			CL_FALSE,
 			0,
 			sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
 			(void*)inputOutput1,
