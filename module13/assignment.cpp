@@ -311,8 +311,6 @@ int main(int argc, char** argv)
       NULL,
       NULL);
  
-    std::vector<cl_event> events0;
-	std::vector<cl_event> events1;
     // call kernel for each device
     cl_event event0;
 	cl_event event1;
@@ -331,10 +329,6 @@ int main(int argc, char** argv)
 		  0, 
 		  0, 
 		  &event0);
-		
-		events0.push_back(event0);
-		//shouldnt be needed
-		//errNum = clEnqueueMarker(queue1, &event1);
 
 		errNum = clEnqueueNDRangeKernel(
 		  queue1, 
@@ -346,45 +340,30 @@ int main(int argc, char** argv)
 		  0, 
 		  0, 
 		  &event1); 
-		
-		events1.push_back(event0);
-	
-	}
-
- 	//Wait for queue 1 to complete before continuing on queue 0
- 	//errNum = clEnqueueBarrier(queue0);
- 	//errNum = clEnqueueWaitForEvents(queue0, 1, &event1);
-	
-	for (int i = 0 ; i < 10; i++)
-	{
-		clWaitForEvents(events0.size(), &events0[i]);
-
-		// Read back computed data
+		  
 		clEnqueueReadBuffer(
-				queue0,
-				buffer0,
-				CL_FALSE,
-				0,
-				sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
-				(void*)inputOutput0,
-				0,
-				NULL,
-				NULL);
-				
-		clWaitForEvents(events1.size(), &events1[i]);
-		
+			queue0,
+			buffer0,
+			CL_TRUE,
+			0,
+			sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
+			(void*)inputOutput0,
+			0,
+			NULL,
+			NULL);
+		  
 		clEnqueueReadBuffer(
-				queue1,
-				buffer1,
-				CL_FALSE,
-				0,
-				sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
-				(void*)inputOutput1,
-				0,
-				NULL,
-				NULL);
-	 
-		// Display output in rows
+			queue1,
+			buffer1,
+			CL_TRUE,
+			0,
+			sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
+			(void*)inputOutput1,
+			0,
+			NULL,
+			NULL);
+			
+					// Display output in rows
 		for (unsigned elems = 0; elems < NUM_BUFFER_ELEMENTS; elems++)
 		{
 		 std::cout << " " << inputOutput0[elems];
@@ -398,6 +377,10 @@ int main(int argc, char** argv)
 		std::cout << std::endl;
 	
 	}
+
+ 	//Wait for queue 1 to complete before continuing on queue 0
+ 	//errNum = clEnqueueBarrier(queue0);
+ 	//errNum = clEnqueueWaitForEvents(queue0, 1, &event1);
  
     std::cout << "Program completed successfully" << std::endl;
 
