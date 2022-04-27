@@ -356,7 +356,7 @@ int main(int argc, char** argv)
 		(void*)inputOutput0,
 		10,
 		event0,
-		read[0]);
+		&read[0]);
 		
 	clEnqueueReadBuffer(
 		queue1,
@@ -367,7 +367,7 @@ int main(int argc, char** argv)
 		(void*)inputOutput1,
 		10,
 		event1,
-		read[1]);
+		&read[1]);
 		
 	clWaitForEvents(2, read);
 
