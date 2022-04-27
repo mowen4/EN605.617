@@ -327,8 +327,8 @@ int main(int argc, char** argv)
 		  NULL,
 		  (const size_t*)&gWI, 
 		  (const size_t*)NULL, 
-		  0, 
-		  NULL, 
+		  1, 
+		  &waitMarker, 
 		  &event0);
 
 		errNum = clEnqueueNDRangeKernel(
@@ -338,14 +338,15 @@ int main(int argc, char** argv)
 		  NULL,
 		  (const size_t*)&gWI, 
 		  (const size_t*)NULL, 
-		  0, 
-		  NULL, 
+		  1, 
+		  &waitMarker, 
 		  &event1);
 		  
-		  clEnqueueMarker(queue0, &waitMarker);
 		  
 	}
 	
+	errNum = clEnqueueBarrier(queue0);
+ 	errNum = clEnqueueWaitForEvents(queue0, 1, &event1);
 	//find a way to fire the first kernel event
 	
 	for (int i = 0 ; i < 10; i++)
@@ -358,8 +359,8 @@ int main(int argc, char** argv)
 			0,
 			sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
 			(void*)inputOutput0,
-			1,
-			&waitMarker,
+			0,
+			NULL,
 			NULL);
 			
 		clEnqueueReadBuffer(
@@ -372,7 +373,10 @@ int main(int argc, char** argv)
 			0,
 			0,
 			NULL);
+
 	}
+	
+	
 			
 					// Display output in rows
 	for (unsigned elems = 0; elems < NUM_BUFFER_ELEMENTS; elems++)
