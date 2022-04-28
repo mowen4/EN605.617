@@ -318,13 +318,13 @@ int runKernels(int size)
 
  
     // call kernel for each device
-    cl_event event0[10], event1[10];
+    cl_event event0[size], event1[size];
 	cl_event read[2];
 	cl_event waitMarker;
 	
     size_t gWI = NUM_BUFFER_ELEMENTS;
 
-	for (int i = 0 ; i < 10; i++)
+	for (int i = 0 ; i < size; i++)
 	{
 
 		errNum = clEnqueueNDRangeKernel(
