@@ -13,21 +13,15 @@
 //    This is a (very) simple raytracer that is intended to demonstrate 
 //    using OpenCL buffers.
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <helper_cuda.h>
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <string>
+#include <vector>
 #include <chrono>
 
-#ifdef __APPLE__
-#include <OpenCL/cl.h>
-#else
-#include <CL/cl.h>
-#endif
-
 using namespace std::chrono;
+
 #include "info.hpp"
 
 #define DEFAULT_PLATFORM 0
