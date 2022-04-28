@@ -358,7 +358,7 @@ int runKernels(int size)
 		0,
 		sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
 		(void*)inputOutput0,
-		10,
+		size,
 		event0,
 		&read[0]);
 		
@@ -369,7 +369,7 @@ int runKernels(int size)
 		0,
 		sizeof(int) * NUM_BUFFER_ELEMENTS * numDevices,
 		(void*)inputOutput1,
-		10,
+		size,
 		event1,
 		&read[1]);
 		
