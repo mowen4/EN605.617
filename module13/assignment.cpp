@@ -415,13 +415,20 @@ int runKernels(int size)
 int main(int argc, char** argv)
 {
 
+
 	
 	int size = 10;
-    if (checkCmdLineFlag(argc, (const char**)argv, "size")) {
-        size = getCmdLineArgumentInt(argc, (const char**)argv, "size");
+    if (checkCmdLineFlag(argc, (const char**)argv, "numKernels")) {
+        size = getCmdLineArgumentInt(argc, (const char**)argv, "numKernels");
     }
 
+	auto start = high_resolution_clock::now();	
     runKernels(size);
+	auto stop = high_resolution_clock::now();
+    auto duration = duration_cast<microseconds>(stop - start);
+	std::cout << std::endl;
+	std::cout << "Time taken: "
+		<< (float)duration.count() / 1000000 << " seconds" << std::endl;
 	
 	return 0;
 
