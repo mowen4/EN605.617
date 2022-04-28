@@ -426,9 +426,9 @@ int main(int argc, char** argv)
     runKernels(size);
 	auto stop = high_resolution_clock::now();
     auto duration = duration_cast<microseconds>(stop - start);
-	std::cout << std::endl;
 	std::cout << "Time taken: "
 		<< (float)duration.count() / 1000000 << " seconds" << std::endl;
+	std::cout << std::endl;
 	
 	return 0;
 
