@@ -13,6 +13,10 @@
 //    This is a (very) simple raytracer that is intended to demonstrate 
 //    using OpenCL buffers.
 
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <helper_cuda.h>
 #include <iostream>
 #include <fstream>
 #include <sstream>
