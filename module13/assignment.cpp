@@ -13,12 +13,21 @@
 //    This is a (very) simple raytracer that is intended to demonstrate 
 //    using OpenCL buffers.
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <helper_cuda.h>
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <string>
-#include <vector>
+#include <chrono>
 
+#ifdef __APPLE__
+#include <OpenCL/cl.h>
+#else
+#include <CL/cl.h>
+#endif
+
+using namespace std::chrono;
 #include "info.hpp"
 
 #define DEFAULT_PLATFORM 0
@@ -37,12 +46,9 @@ checkErr(cl_int err, const char * name)
 }
 
 
-
-///
-//	main() for simple buffer and sub-buffer example
-//
-int main(int argc, char** argv)
+int runKernels(int size)
 {
+
     cl_int errNum;
     cl_uint numPlatforms;
     cl_uint numDevices;
@@ -58,8 +64,8 @@ int main(int argc, char** argv)
 	int * inputOutput3;
 
     int platform = DEFAULT_PLATFORM; 
-
-    std::cout << "Simple buffer and sub-buffer Example" << std::endl;
+	
+	std::cout << "SImple Dynamic Async Example" << std::endl;
 
     // First, select an OpenCL platform to run on.  
     errNum = clGetPlatformIDs(0, NULL, &numPlatforms);
@@ -379,7 +385,7 @@ int main(int argc, char** argv)
 	
 	
 			
-					// Display output in rows
+	// Display output in rows
 	for (unsigned elems = 0; elems < NUM_BUFFER_ELEMENTS; elems++)
 	{
 	 std::cout << " " << inputOutput0[elems];
@@ -400,4 +406,26 @@ int main(int argc, char** argv)
     std::cout << "Program completed successfully" << std::endl;
 
     return 0;
+	
+}
+
+
+
+///
+//	main() for simple buffer and sub-buffer example
+//
+int main(int argc, char** argv)
+{
+
+	
+	int size = 10;
+    if (checkCmdLineFlag(argc, (const char**)argv, "size")) {
+        size = getCmdLineArgumentInt(argc, (const char**)argv, "size");
+    }
+
+    runKernels(size);
+	
+	return 0;
+
+    
 }
