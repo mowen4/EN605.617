@@ -116,7 +116,7 @@ int thruster(unsigned int n)
 //main and driver code
 int main(int argc, char** argv) {
     
-    unsigned int n = 10;
+    unsigned int n = 8;
 
     if (argc == 2) {
 
