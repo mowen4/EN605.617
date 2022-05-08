@@ -4,6 +4,8 @@ Use make to compile the program.
 ./project 9 will be for 100M records.
 The program will by default run 10M records, vocareum did not support 100M of memory objects
 
+requires c++11 and latest cuda dev kit
+
 The python code can be run with the latest standard conda install of python using "python project.py"
 it will run as a default for 10M records as well. that can be changed by altering line 28
 
