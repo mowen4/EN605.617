@@ -63,7 +63,17 @@ struct POINTCmpMiles {
     }
 };
 
-int thruster(int n)
+unsigned long int quick_pow10(int n)
+{
+    static unsigned long int pow10[11] = {
+        1, 10, 100, 1000, 10000,
+        100000, 1000000, 10000000, 100000000, 1000000000, 10000000000
+    };
+
+    return pow10[n];
+}
+
+int thruster(unsigned int n)
 {
     thrust::host_vector<POINT> p_h;
     thrust::device_vector<POINT> p_d;
@@ -81,13 +91,18 @@ int thruster(int n)
 
     p_d = p_h;
 
-    //thrust::stable_sort(p_d.begin(), p_d.end(), POINTCmpDate());
+    clock_t start, end;
+    double time_spent;
+    start = clock();
+
+    thrust::stable_sort(p_d.begin(), p_d.end(), POINTCmpDate());
     thrust::stable_sort(p_d.begin(), p_d.end(), POINTCmpLon());
     thrust::stable_sort(p_d.begin(), p_d.end(), POINTCmpLat());
     thrust::stable_sort(p_d.begin(), p_d.end(), POINTCmpMiles());
 
-
-    std::cout << "Sorted" << std::endl;
+    end = clock();
+    time_spent = (double)(end - start) / CLOCKS_PER_SEC;
+    printf("Thrust Operations on %i objects: %f seconds\n", n, time_spent);
 
     //for (POINT p : p_d) {
     //    std::cout << p.miles << "\t" << p.date << "\t" << p.lat << "\t" << p.lon << std::endl;
@@ -96,10 +111,12 @@ int thruster(int n)
     return 0;
 }
 
+
+
 //main and driver code
 int main(int argc, char** argv) {
     
-    int n = 50000;
+    unsigned int n = 10;
 
     if (argc == 2) {
 
@@ -108,15 +125,10 @@ int main(int argc, char** argv) {
 
     }
 
-    clock_t start, end;
-    double time_spent;
-    start = clock();
-
-    thruster(n);
-
-    end = clock();
-    time_spent = (double)(end - start) / CLOCKS_PER_SEC;
-    printf("\n\nThrust Operations on %i ints: %f seconds\n", n, time_spent);
+    for (int i = 0; i < 8; i++)
+    {
+        thruster(quick_pow10(i));
+    }
 
     return 0;
 }
