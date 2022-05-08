@@ -121,11 +121,11 @@ int main(int argc, char** argv) {
     if (argc == 2) {
 
         n = atoi(argv[1]);
-        printf("Num ints changed to:%i\n", n);
+        printf("Maximum power of 10 changed to:%i\n", n);
 
     }
 
-    for (int i = 0; i < 8; i++)
+    for (int i = 0; i < n; i++)
     {
         thruster(quick_pow10(i));
     }
