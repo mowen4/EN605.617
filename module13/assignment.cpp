@@ -63,7 +63,7 @@ int runKernels(int size)
 
     int platform = DEFAULT_PLATFORM; 
 	
-	std::cout << "Simple Dynamic Async Example" << std::endl;
+	std::cout << "SImple Dynamic Async Example" << std::endl;
 
     // First, select an OpenCL platform to run on.  
     errNum = clGetPlatformIDs(0, NULL, &numPlatforms);
